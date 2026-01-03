@@ -1,12 +1,12 @@
-
+import Navbar from './Components/Navbar'
 import Footer from './Components/Footer'
 import { Outlet } from 'react-router'
 
-const Root = () => {
+const Layout = () => {
     return (
-
-        <div>
-            <main>
+        <div className="min-h-screen flex flex-col">
+            <Navbar />
+            <main className="flex-grow">
                 <Outlet />
             </main>
             <Footer />
@@ -14,4 +14,4 @@ const Root = () => {
     )
 }
 
-export default Root
+export default Layout
