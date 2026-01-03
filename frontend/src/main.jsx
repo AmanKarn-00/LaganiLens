@@ -8,8 +8,8 @@ import Signup from './Pages/Signup'
 import Login from './Pages/Login'
 import About from './Pages/About'
 import Homepage from './Pages/Homepage';
-
-const routing = createBrowserRouter([
+import ProtectedRoute from './Components/ProtectedRoute'
+const routing102 = createBrowserRouter([
   {
     path: '/'
     , element: <Root />,
@@ -23,12 +23,12 @@ const routing = createBrowserRouter([
     path: '/'
     , element: <Layout />,
     children: [
-      { path: "homepage", element: <Homepage /> }
+      { path: "homepage", element:<ProtectedRoute><Homepage /></ProtectedRoute>  }
     ]
   }
 ])
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-   <RouterProvider router={routing} />
+   <RouterProvider router={routing102} />
   </StrictMode>,
 )
