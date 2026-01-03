@@ -1,4 +1,5 @@
-
+import  hero from '../Assets/hero.png'
+import hero2 from '../Assets/hero2.png'
 import { useNavigate } from 'react-router'
 export default function Body(){
     const navigate=useNavigate();
