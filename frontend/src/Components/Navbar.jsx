@@ -1,203 +1,156 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { auth } from '../firebase'
 import { signOut } from 'firebase/auth'
-import { useState } from 'react'
 import { Button } from './ui/button'
-
-
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu"
+import { LogOut, LayoutDashboard, Home, Info } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import logo from "../Assets/logo.jpg"
 const Navbar = () => {
   const navigate = useNavigate()
   const user = auth.currentUser
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
       await signOut(auth)
       navigate('/')
-      setMobileMenuOpen(false)
     } catch (error) {
       console.error('Logout error:', error)
     }
   }
 
-  return (
-    <nav className="bg-white/95 backdrop-blur-md shadow-lg sticky top-0 z-50 border-b border-gray-200/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 group">
-            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-3 py-1.5 rounded-lg font-bold text-xl shadow-lg transform group-hover:scale-105 transition-transform">
-              LaganiLens
-            </div>
-          </Link>
+  const getUserInitials = () => {
+    if (!user?.email) return 'U'
+    return user.email.charAt(0).toUpperCase()
+  }
 
-          {/* Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-2">
-            <NavLink 
-              to="/" 
-              className={({ isActive }) => 
-                `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive 
-                    ? 'text-blue-600 bg-blue-50 shadow-sm' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink 
-              to="/about" 
-              className={({ isActive }) => 
-                `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  isActive 
-                    ? 'text-blue-600 bg-blue-50 shadow-sm' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`
-              }
-            >
-              About
-            </NavLink>
+  return (
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto px-4">
+        <div className="flex h-16 items-center justify-between">
+          {/* Logo and Brand */}
+          <div className="flex items-center gap-6">
+            <Link to="/" className="flex items-center gap-3 group">
+              {/* Logo placeholder - add your logo here */}
+              <img src={logo} alt="LaganiLens Logo" className="w-12 h-12" />
+              <span className="text-xl font-bold bg-gradient-to-r from-green-900 to-green-700 bg-clip-text text-transparent">
+                LaganiLens
+              </span>
+            </Link>
+
+            {/* Navigation Links */}
+            <NavigationMenu>
+              <NavigationMenuList className="gap-1">
+                <NavigationMenuItem>
+                  <NavLink to="/">
+                    {({ isActive }) => (
+                      <NavigationMenuLink
+                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                          isActive ? 'bg-accent text-accent-foreground' : ''
+                        }`}
+                      >
+                        <Home className="mr-2 h-4 w-4" />
+                        Home
+                      </NavigationMenuLink>
+                    )}
+                  </NavLink>
+                </NavigationMenuItem>
+                
+                <NavigationMenuItem>
+                  <NavLink to="/about">
+                    {({ isActive }) => (
+                      <NavigationMenuLink
+                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                          isActive ? 'bg-accent text-accent-foreground' : ''
+                        }`}
+                      >
+                        <Info className="mr-2 h-4 w-4" />
+                        About
+                      </NavigationMenuLink>
+                    )}
+                  </NavLink>
+                </NavigationMenuItem>
+
+                {user && (
+                  <NavigationMenuItem>
+                    <NavLink to="/homepage">
+                      {({ isActive }) => (
+                        <NavigationMenuLink
+                          className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
+                            isActive ? 'bg-accent text-accent-foreground' : ''
+                          }`}
+                        >
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Dashboard
+                        </NavigationMenuLink>
+                      )}
+                    </NavLink>
+                  </NavigationMenuItem>
+                )}
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="flex items-center gap-2">
             {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                    <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-primary/10">
+                      <AvatarImage src={user.photoURL || undefined} alt={user.email || 'User'} />
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">Account</p>
+                      <p className="text-xs leading-none text-muted-foreground truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => navigate('/homepage')} className="cursor-pointer">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
               <>
-                <NavLink 
-                  to="/homepage" 
-                  className={({ isActive }) => 
-                    `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      isActive 
-                        ? 'text-blue-600 bg-blue-50 shadow-sm' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`
-                  }
-                >
-                  Dashboard
-                </NavLink>
-                <Button
-                  onClick={handleLogout}
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-                >
-                  Logout
+                <Button variant="ghost" asChild>
+                  <NavLink to="/login">Login</NavLink>
+                </Button>
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+                  <NavLink to="/signup">Sign Up</NavLink>
                 </Button>
               </>
-            ) : (
-              <>
-                <NavLink 
-                  to="/login" 
-                  className={({ isActive }) => 
-                    `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                      isActive 
-                        ? 'text-blue-600 bg-blue-50 shadow-sm' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`
-                  }
-                >
-                  Login
-                </NavLink>
-                <NavLink 
-                  to="/signup" 
-                  className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
-                >
-                  Sign Up
-                </NavLink>
-              </>
             )}
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden">
-            <button 
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-700 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              {mobileMenuOpen ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-2 animate-fade-in border-t border-gray-200 mt-2">
-            <NavLink 
-              to="/" 
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }) => 
-                `block px-4 py-2 rounded-lg text-base font-medium transition-colors ${
-                  isActive 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`
-              }
-            >
-              Home
-            </NavLink>
-            <NavLink 
-              to="/about" 
-              onClick={() => setMobileMenuOpen(false)}
-              className={({ isActive }) => 
-                `block px-4 py-2 rounded-lg text-base font-medium transition-colors ${
-                  isActive 
-                    ? 'text-blue-600 bg-blue-50' 
-                    : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                }`
-              }
-            >
-              About
-            </NavLink>
-            {user ? (
-              <>
-                <NavLink 
-                  to="/homepage" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => 
-                    `block px-4 py-2 rounded-lg text-base font-medium transition-colors ${
-                      isActive 
-                        ? 'text-blue-600 bg-blue-50' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`
-                  }
-                >
-                  Dashboard
-                </NavLink>
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 rounded-lg text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <NavLink 
-                  to="/login" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={({ isActive }) => 
-                    `block px-4 py-2 rounded-lg text-base font-medium transition-colors ${
-                      isActive 
-                        ? 'text-blue-600 bg-blue-50' 
-                        : 'text-gray-700 hover:text-blue-600 hover:bg-gray-50'
-                    }`
-                  }
-                >
-                  Login
-                </NavLink>
-                <NavLink 
-                  to="/signup" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 rounded-lg text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all text-center"
-                >
-                  Sign Up
-                </NavLink>
-              </>
-            )}
-          </div>
-        )}
       </div>
     </nav>
   )
