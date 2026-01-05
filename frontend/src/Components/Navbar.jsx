@@ -2,6 +2,8 @@ import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { auth } from '../firebase'
 import { signOut } from 'firebase/auth'
 import { useState } from 'react'
+import { Button } from './ui/button'
+
 
 const Navbar = () => {
   const navigate = useNavigate()
@@ -69,12 +71,12 @@ const Navbar = () => {
                 >
                   Dashboard
                 </NavLink>
-                <button
+                <Button
                   onClick={handleLogout}
                   className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-lg transform hover:scale-105"
                 >
                   Logout
-                </button>
+                </Button>
               </>
             ) : (
               <>

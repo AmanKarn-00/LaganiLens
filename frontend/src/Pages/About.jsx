@@ -1,7 +1,7 @@
 import React from 'react'
-
 const About = () => {
   return (
+   
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute top-20 left-10 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
@@ -21,6 +21,7 @@ const About = () => {
         {/* Main Content */}
         <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-8 md:p-12 space-y-10 border border-white/20 animate-fade-in">
           <section>
+            
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Project Overview</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
               LaganiLens is an academic AI/ML project focused on acquiring historical NEPSE (Nepal Stock Exchange) data, 
