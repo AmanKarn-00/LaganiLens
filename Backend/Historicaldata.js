@@ -24,7 +24,6 @@ export const importCSVData = async (folderPath = "./combined_csv") => {
   for (const file of files) {
     const results = [];
 
-    // ✅ extract date PER file
    const filename = path.basename(file, ".csv");
    const normalizedDate = filename.replace(/_/g, "-");
 

@@ -27,4 +27,6 @@ const nepseSchema = new mongoose.Schema({
   date: {type: Date},
 }, { timestamps: true });
 
+nepseSchema.index({ symbol: 1, date: 1 }, { unique: true });
+
 export default mongoose.model("NepseStock", nepseSchema);
