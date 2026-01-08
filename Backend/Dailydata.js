@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
 import csv from "csv-parser";
-
 import connectDB from "./Models/db.js";
 import NepseStock from "./Models/NEPSEdata.js";
-
+import dotenv from "dotenv";
+dotenv.config();
 function cleanNumber(value) {
   if (value === null || value === undefined) return null;
   if (typeof value === "string") {
@@ -14,7 +14,15 @@ function cleanNumber(value) {
   return Number(value);
 }
 
-export function csvFilePath(baseFolder = "./Scraper/docs/Data") {
+export function csvFilePath(
+  baseFolder = path.join(
+    process.cwd(),
+    "..",
+    "Scraper",
+    "docs",
+    "Data"
+  )
+) {
   const today = new Date();
 
   const year = today.getFullYear();
@@ -103,3 +111,18 @@ const importSingleCSV = async (csvFilePath) => {
     modified: result.modifiedCount
   });
 };
+
+(async () => {
+  try {
+    const filePath = csvFilePath(); // auto-picks today's CSV
+    console.log("Importing:", filePath);
+
+    await importSingleCSV(filePath);
+
+    console.log("Import finished successfully");
+    process.exit(0);
+  } catch (err) {
+    console.error("Import failed:", err);
+    process.exit(1);
+  }
+})();
