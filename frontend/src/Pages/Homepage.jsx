@@ -17,6 +17,7 @@ import {
   User,
   Wallet,
   Briefcase,
+  CandlestickChart,
 } from "lucide-react"
 
 const Homepage = () => {
@@ -177,6 +178,36 @@ const Homepage = () => {
             </CardContent>
           </Card>
 
+          {/* Stock Analysis */}
+          <Card className="group hover:shadow-lg transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-cyan-500/10">
+                  <CandlestickChart className="h-5 w-5 text-cyan-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Stock Analysis</CardTitle>
+                  <CardDescription>
+                    Advanced chart tools
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Analyze stocks with professional candlestick charts, moving averages, and volume indicators.
+              </p>
+              <Button 
+                onClick={() => navigate("/analysis")}
+                variant="secondary"
+                className="w-full"
+              >
+                View Charts
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* NEPSE Data Analysis */}
           <Card className="group hover:shadow-lg transition-all duration-200">
             <CardHeader>
@@ -185,7 +216,7 @@ const Homepage = () => {
                   <BarChart3 className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Market Data</CardTitle>
+                  <CardTitle className="text-lg">Stock Analysis</CardTitle>
                   <CardDescription>
                     Historical analytics
                   </CardDescription>
@@ -194,13 +225,14 @@ const Homepage = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Access historical NEPSE data and perform comprehensive market analysis.
+                Analyze historical price trends, volume data, and moving averages for NEPSE stocks.
               </p>
               <Button 
+                onClick={() => navigate("/analysis")}
                 variant="secondary"
                 className="w-full"
               >
-                View Data
+                View Analysis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>

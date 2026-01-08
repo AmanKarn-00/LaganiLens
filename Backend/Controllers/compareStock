@@ -77,3 +77,49 @@ export const searchStock = async (req, res) => {
 
   res.json(stocks);
 };
+
+export const getStockHistory = async (req, res) => {
+  const { symbol } = req.params;
+  const { days = 365 } = req.query;
+
+  if (!symbol) {
+    return res.status(400).json({ message: "symbol parameter required" });
+  }
+
+  try {
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - parseInt(days));
+
+    // Fetch historical data
+    const historicalData = await NepseStock.find({
+      symbol: symbol.toUpperCase(),
+      date: { $gte: startDate, $lte: endDate }
+    })
+    .sort({ date: 1 }) // Sort oldest first for charting
+    .select('date open high low close volume movingAvg120 movingAvg180')
+    .lean();
+
+    // Format data for lightweight-charts
+    const formattedData = historicalData.map(item => ({
+      date: item.date.toISOString().split('T')[0],
+      time: Math.floor(item.date.getTime() / 1000), // Unix timestamp in seconds
+      open: item.open || 0,
+      high: item.high || 0,
+      low: item.low || 0,
+      close: item.close || 0,
+      volume: item.volume || 0,
+      ma120: item.movingAvg120 || null,
+      ma180: item.movingAvg180 || null
+    }));
+
+    res.json({
+      symbol: symbol.toUpperCase(),
+      data: formattedData
+    });
+  } catch (error) {
+    console.error("Error fetching stock history:", error);
+    res.status(500).json({ message: "Error fetching stock history", error: error.message });
+  }
+};
