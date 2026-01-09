@@ -24,7 +24,7 @@ const nepseSchema = new mongoose.Schema({
   movingAvg180: { type: Number },
   high52Weeks: { type: Number },
   low52Weeks: { type: Number },
-  date: {type: Date},
+  date: { type: Date },
 }, { timestamps: true });
 
 nepseSchema.index({ symbol: 1, date: 1 }, { unique: true });

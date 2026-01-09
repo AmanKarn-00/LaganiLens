@@ -1,14 +1,16 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { auth } from '../firebase'
-import { signOut } from 'firebase/auth'
-import { Button } from './ui/button'
+import { signOut, onAuthStateChanged } from 'firebase/auth'
+import { Button } from '@/components/ui/button'
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-import { LogOut, LayoutDashboard, Home, Info } from 'lucide-react'
+import { LogOut, LayoutDashboard, Home, Info, Moon, Sun, Settings } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -18,14 +20,54 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import logo from '../Assets/logo.jpg'
+import { cn } from "@/lib/utils"
+
+// Use your alias for assets
+import logo from '@/Assets/logo.png'
+
 const Navbar = () => {
   const navigate = useNavigate()
-  const user = auth.currentUser
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [darkMode, setDarkMode] = useState(false)
+
+  // 1. Listen to Auth State
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser)
+      setLoading(false)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  // 2. Initialize Dark Mode from Local Storage
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    setDarkMode(savedDarkMode)
+    if (savedDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
+
+  // 3. Toggle Dark Mode Function
+  const toggleDarkMode = () => {
+    const newDarkMode = !darkMode
+    setDarkMode(newDarkMode)
+    localStorage.setItem('darkMode', newDarkMode.toString())
+    if (newDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }
 
   const handleLogout = async () => {
     try {
       await signOut(auth)
+      localStorage.clear()
+      sessionStorage.clear()
       navigate('/')
     } catch (error) {
       console.error('Logout error:', error)
@@ -37,85 +79,94 @@ const Navbar = () => {
     return user.email.charAt(0).toUpperCase()
   }
 
+  // Helper for NavLink styles
+  const navLinkClasses = ({ isActive }) => 
+    cn(
+      navigationMenuTriggerStyle(),
+      "bg-transparent cursor-pointer transition-colors",
+      isActive && "bg-accent text-accent-foreground dark:bg-gray-800 dark:text-white"
+    )
+
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
+          
+          {/* LOGO SECTION */}
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logo} alt="LaganiLens Logo" className="w-12 h-12" />
-            <span className="text-xl font-bold bg-gradient-to-r from-gray-950 to-gray-600 bg-clip-text text-transparent h-8">
+            <img src={logo} alt="LaganiLens Logo" className="w-10 h-10 object-contain" />
+            <span className="text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent">
               LaganiLens
             </span>
           </Link>
 
-          {/* Navigation Links and Auth - Right */}
-          <div className="flex items-center gap-6">
-            <NavigationMenu>
-              <NavigationMenuList className="gap-1">
+          {/* NAVIGATION LINKS */}
+          <div className="flex items-center gap-4">
+            <NavigationMenu className="hidden md:flex">
+              <NavigationMenuList>
                 <NavigationMenuItem>
-                  <NavLink to="/">
-                    {({ isActive }) => (
-                      <NavigationMenuLink
-                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                          isActive ? 'bg-accent text-accent-foreground' : ''
-                        }`}
-                      >
-                        <Home className="mr-2 h-4 w-4" />
-                        Home
-                      </NavigationMenuLink>
-                    )}
-                  </NavLink>
+                  <NavigationMenuLink asChild>
+                    <NavLink to="/" className={navLinkClasses}>
+                      <Home className="mr-2 h-4 w-4" />
+                      Home
+                    </NavLink>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
-                
+
                 <NavigationMenuItem>
-                  <NavLink to="/about">
-                    {({ isActive }) => (
-                      <NavigationMenuLink
-                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                          isActive ? 'bg-accent text-accent-foreground' : ''
-                        }`}
-                      >
-                        <Info className="mr-2 h-4 w-4" />
-                        About
-                      </NavigationMenuLink>
-                    )}
-                  </NavLink>
+                  <NavigationMenuLink asChild>
+                    <NavLink to="/about" className={navLinkClasses}>
+                      <Info className="mr-2 h-4 w-4" />
+                      About
+                    </NavLink>
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
 
                 {user && (
                   <NavigationMenuItem>
-                    <NavLink to="/homepage">
-                      {({ isActive }) => (
-                        <NavigationMenuLink
-                          className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                            isActive ? 'bg-accent text-accent-foreground' : ''
-                          }`}
-                        >
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Dashboard
-                        </NavigationMenuLink>
-                      )}
-                    </NavLink>
+                    <NavigationMenuLink asChild>
+                      <NavLink to="/homepage" className={navLinkClasses}>
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        Dashboard
+                      </NavLink>
+                    </NavigationMenuLink>
                   </NavigationMenuItem>
                 )}
               </NavigationMenuList>
             </NavigationMenu>
 
-            {/* Auth Buttons */}
+            {/* ACTION BUTTONS */}
             <div className="flex items-center gap-2">
+              
+              {/* PUBLIC DARK MODE TOGGLE */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleDarkMode} 
+                className="rounded-full hover:bg-accent dark:hover:bg-gray-800"
+                aria-label="Toggle Theme"
+              >
+                {darkMode ? (
+                  <Sun className="h-5 w-5 text-yellow-500 transition-all" />
+                ) : (
+                  <Moon className="h-5 w-5 text-slate-700 transition-all" />
+                )}
+              </Button>
+
               {user ? (
+                /* LOGGED IN: User Dropdown */
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                      <Avatar className="h-10 w-10 ring-2 ring-offset-2 ring-primary/10">
-                        <AvatarImage src={user.photoURL || undefined} alt={user.email || 'User'} />
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                    <Button variant="ghost" className="relative h-10 w-10 rounded-full focus-visible:ring-0">
+                      <Avatar className="h-10 w-10 border border-border">
+                        <AvatarImage src={user.photoURL} alt={user.email} />
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white">
                           {getUserInitials()}
                         </AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent align="end" className="w-56 mt-2">
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">Account</p>
@@ -126,25 +177,30 @@ const Navbar = () => {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/homepage')} className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Dashboard
+                      <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/settings')} className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" /> Settings
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Logout
+                    <DropdownMenuItem 
+                      onClick={handleLogout} 
+                      className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10"
+                    >
+                      <LogOut className="mr-2 h-4 w-4" /> Logout
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <>
-                  <Button variant="ghost" asChild>
-                    <NavLink to="/login">Login</NavLink>
+                /* LOGGED OUT: Auth Buttons */
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                    <Link to="/login">Login</Link>
                   </Button>
-                  <Button asChild className="bg-gradient-to-r from-black to-gray-500 hover:from-white hover:to-black">
-                    <NavLink to="/signup">Sign Up</NavLink>
+                  <Button asChild className="bg-primary text-primary-foreground hover:opacity-90">
+                    <Link to="/signup">Sign Up</Link>
                   </Button>
-                </>
+                </div>
               )}
             </div>
           </div>

@@ -12,7 +12,8 @@ import {
 
 const About = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100">
+    // Changed background to use theme-aware colors
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <div className="max-w-5xl mx-auto px-6 py-20">
 
         {/* Header */}
@@ -21,28 +22,28 @@ const About = () => {
             Academic AI / ML Project
           </Badge>
 
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground">
             About{" "}
             <span className="text-primary">
               LaganiLens
             </span>
           </h1>
 
-          <p className="text-slate-800 text-lg mt-4 max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg mt-4 max-w-2xl mx-auto">
             An academic project exploring the Nepal Stock Exchange using modern
             data science and machine learning techniques.
           </p>
         </div>
 
         {/* Overview */}
-        <Card className="mb-12 border-slate-200">
+        <Card className="mb-12 border-border bg-card text-card-foreground">
           <CardHeader>
-            <CardTitle className="text-slate-900">
+            <CardTitle>
               Project Overview
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4 text-slate-800 leading-relaxed">
+          <CardContent className="space-y-4 leading-relaxed">
             <p>
               LaganiLens focuses on acquiring historical NEPSE (Nepal Stock
               Exchange) data, preprocessing it, and applying machine learning
@@ -59,7 +60,7 @@ const About = () => {
 
         {/* Objectives */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-8 text-slate-900">
+          <h2 className="text-3xl font-bold mb-8 text-foreground">
             What This Project Covers
           </h2>
 
@@ -95,31 +96,27 @@ const About = () => {
 
         {/* Tech Stack */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold mb-8 text-slate-900">
+          <h2 className="text-3xl font-bold mb-8 text-foreground">
             Technology Stack
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className="border-slate-200">
+            <Card className="border-border bg-card text-card-foreground">
               <CardHeader className="flex flex-row items-center gap-3">
                 <Cpu className="text-primary" />
-                <CardTitle className="text-slate-900">
-                  Frontend
-                </CardTitle>
+                <CardTitle>Frontend</CardTitle>
               </CardHeader>
-              <CardContent className="text-slate-800">
+              <CardContent>
                 React, Tailwind CSS, shadcn/ui, Firebase Authentication
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200">
+            <Card className="border-border bg-card text-card-foreground">
               <CardHeader className="flex flex-row items-center gap-3">
                 <Brain className="text-primary" />
-                <CardTitle className="text-slate-900">
-                  Data Science
-                </CardTitle>
+                <CardTitle>Data Science</CardTitle>
               </CardHeader>
-              <CardContent className="text-slate-800">
+              <CardContent>
                 Python, Machine Learning, Data Analysis
               </CardContent>
             </Card>
@@ -127,13 +124,13 @@ const About = () => {
         </div>
 
         {/* Disclaimer */}
-        <Card className="border-l-4 border-yellow-600 bg-yellow-100">
+        <Card className="border-l-4 border-yellow-600 bg-yellow-50 dark:bg-yellow-950/20">
           <CardHeader>
-            <CardTitle className="text-slate-900">
+            <CardTitle className="text-yellow-800 dark:text-yellow-500">
               Disclaimer
             </CardTitle>
           </CardHeader>
-          <CardContent className="text-slate-800 leading-relaxed">
+          <CardContent className="text-yellow-900 dark:text-yellow-200/80 leading-relaxed">
             <strong>Important:</strong> This is an academic project intended
             solely for educational purposes. Stock market predictions are
             inherently uncertain and should not be used as the sole basis for
@@ -148,16 +145,14 @@ const About = () => {
 
 function Objective({ icon, title, desc, full }) {
   return (
-    <Card className={`${full ? "md:col-span-2" : ""} border-slate-200`}>
+    <Card className={`${full ? "md:col-span-2" : ""} border-border bg-card text-card-foreground`}>
       <CardHeader className="flex flex-row items-center gap-3">
         <div className="p-2 rounded-lg bg-primary/15 text-primary">
           {icon}
         </div>
-        <CardTitle className="text-slate-900">
-          {title}
-        </CardTitle>
+        <CardTitle>{title}</CardTitle>
       </CardHeader>
-      <CardContent className="text-slate-800">
+      <CardContent className="text-muted-foreground">
         {desc}
       </CardContent>
     </Card>
