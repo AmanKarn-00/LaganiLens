@@ -8,7 +8,8 @@ NEPSE Stock Market Data Analysis and Prediction using Machine Learning
 
 Laganilens is an academic AI/ML project focused on acquiring historical **NEPSE (Nepal Stock Exchange)** data, preprocessing it, and applying machine learning techniques to analyze trends and make predictions.
 
-The primary objective of this project is to understand the end-to-end pipeline of a real-world data science project, including data acquisition (web scraping / APIs), data cleaning, exploratory analysis, and model building using Nepali stock market data.
+The primary objective of this project is to understand the end-to-end pipeline of a real-world data science project, including data acquisition (web scraping / APIs), data cleaning, exploratory analysis, and model building using Nepali stock market data..
+
 
 ---
 
