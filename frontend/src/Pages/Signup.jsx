@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { auth } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { auth } from "@/firebase"; 
 import { SignupForm } from "@/components/signup-form";
 
 const Signup = () => {
@@ -13,7 +13,7 @@ const Signup = () => {
 
   const navigate = useNavigate();
 
-  // Handles form submission
+  // Handles email/password signup
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
@@ -41,6 +41,49 @@ const Signup = () => {
     }
   };
 
+  // Handles Google Sign-In
+  const handleGoogleSignIn = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      // Create a new Google Auth Provider instance
+      const provider = new GoogleAuthProvider();
+      
+      provider.setCustomParameters({
+  prompt: 'select_account' // Forces account selection every time
+});
+      // Sign in with popup
+      const result = await signInWithPopup(auth, provider);
+      
+      // Get user info
+      const user = result.user;
+      console.log("User signed in with Google:", user);
+
+      // Optional: Get Google Access Token
+      // const credential = GoogleAuthProvider.credentialFromResult(result);
+      // const token = credential.accessToken;
+
+      // Navigate to homepage after successful sign-in
+      navigate("/homepage");
+    } catch (err) {
+      console.error("Google sign-in error:", err);
+      
+      // Handle specific error cases
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError("Sign-in cancelled. Please try again.");
+      } else if (err.code === 'auth/popup-blocked') {
+        setError("Popup was blocked. Please allow popups for this site.");
+      } else if (err.code === 'auth/account-exists-with-different-credential') {
+        setError("An account already exists with the same email address.");
+      } else {
+        setError(err.message || "Failed to sign in with Google. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-muted flex min-h-screen flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
@@ -52,6 +95,7 @@ const Signup = () => {
           confirmPassword={confirmPassword}
           setConfirmPassword={setConfirmPassword}
           onSubmit={handleSignup}
+          onGoogleSignIn={handleGoogleSignIn}
           error={error}
           loading={loading}
         />
