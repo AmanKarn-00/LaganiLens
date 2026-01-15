@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./Models/db.js";
 import { importCSVData } from "./Historicaldata.js";
+import stockRoutes from "./Routes/stockRoutes.js";
+
 dotenv.config();
 connectDB();
 
@@ -11,6 +13,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+//Routes
+app.use("/api/stocks", stockRoutes);
 
 // Test route
 app.get("/", (req, res) => {
