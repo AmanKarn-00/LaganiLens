@@ -11,6 +11,7 @@ import Body from './Pages/Body'
 import Homepage from './Pages/Homepage';
 import ProtectedRoute from './Components/ProtectedRoute'
 import CompareStocksPage from './Pages/Comparstocks'
+import StockPredictionPage from './Pages/PredictionPage'
 const routing102 = createBrowserRouter([
   {
     path: '/'
@@ -27,8 +28,10 @@ const routing102 = createBrowserRouter([
     , element: <Layout />,
     children: [
       { path: "homepage", element:<ProtectedRoute><Homepage /></ProtectedRoute>  },
-      { path: "comparestocks", element:<ProtectedRoute><CompareStocksPage /></ProtectedRoute>}
+      { path: "comparestocks", element:<ProtectedRoute><CompareStocksPage /></ProtectedRoute>},
+      { path: "predictstock", element:<ProtectedRoute><StockPredictionPage /></ProtectedRoute>}
     ]
+    
   }
 ])
 createRoot(document.getElementById('root')).render(

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./Models/db.js";
 import { importCSVData } from "./Historicaldata.js";
 import stockRoutes from "./Routes/stockRoutes.js";
+import predictionRoutes from "./Routes/predictionRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 //Routes
+app.use("/api/predictions", predictionRoutes);  // Changed path
 app.use("/api/stocks", stockRoutes);
 
 // Test route

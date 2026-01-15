@@ -10,65 +10,92 @@ export default function StockSelect({ label, value, onChange, exclude }) {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
-const cacheRef = useRef({});
+  const cacheRef = useRef({});
+  const abortControllerRef = useRef(null);
 
-useEffect(() => {
-  // Trimmed query
-  const trimmedQuery = query.trim();
+  useEffect(() => {
+    const trimmedQuery = query.trim();
 
-  // If query is empty, clear results and close dropdown
-  if (!trimmedQuery) {
-    setResults([]);
-    setIsOpen(false);
-    return;
-  }
-
-  const controller = new AbortController();
-  const currentQuery = trimmedQuery; // capture query for this fetch
-
-  const debounce = setTimeout(async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const apiBase = import.meta.env.VITE_API_URL || "";
-      const apiUrl = `${apiBase}/api/stocks/search?q=${encodeURIComponent(currentQuery)}`;
-      const res = await fetch(apiUrl, { signal: controller.signal });
-
-      if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-
-      const data = await res.json();
-      let stockList = Array.isArray(data) ? data : data.stocks || [];
-
-      // Filter excluded stock
-      const filtered = stockList.filter((s) => s.symbol !== exclude);
-
-      // ✅ Only update state if query hasn’t changed
-      if (query.trim() === currentQuery) {
-        setResults(filtered);
-        setIsOpen(filtered.length > 0);
-        setHighlightedIndex(0);
-      }
-    } catch (err) {
-      if (err.name === "AbortError") return; // ignore cancelled requests
-      console.error(`[${label}] Search error:`, err);
-
-      // Only clear error/results if query hasn’t changed
-      if (query.trim() === currentQuery) {
-        setError(err.message);
-        setResults([]);
-        setIsOpen(false);
-      }
-    } finally {
-      if (query.trim() === currentQuery) setLoading(false);
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
     }
-  }, 200); // debounce 200ms
 
-  return () => {
-    clearTimeout(debounce);
-    controller.abort(); // cancel stale fetch
-  };
-}, [query, label, exclude]);
+    // If query is empty, clear results and close dropdown
+    if (!trimmedQuery) {
+      setResults([]);
+      setIsOpen(false);
+      setLoading(false);
+      return;
+    }
+
+    // Check cache first
+    if (cacheRef.current[trimmedQuery]) {
+      const filtered = cacheRef.current[trimmedQuery].filter(
+        (s) => s.symbol !== exclude
+      );
+      setResults(filtered);
+      setIsOpen(filtered.length > 0);
+      setHighlightedIndex(0);
+      setLoading(false);
+      return;
+    }
+
+    const debounceTimer = setTimeout(async () => {
+      // Create new controller for this request
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const apiBase = "";
+        const apiUrl = `${apiBase}/api/stocks/search?q=${encodeURIComponent(
+          trimmedQuery
+        )}`;
+        const res = await fetch(apiUrl, { signal: controller.signal });
+
+        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+
+        const data = await res.json();
+        let stockList = Array.isArray(data) ? data : data.stocks || [];
+
+        // Cache the results
+        cacheRef.current[trimmedQuery] = stockList;
+
+        // Filter excluded stock
+        const filtered = stockList.filter((s) => s.symbol !== exclude);
+
+        // Only update if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          setResults(filtered);
+          setIsOpen(filtered.length > 0);
+          setHighlightedIndex(0);
+        }
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        console.error(`[${label}] Search error:`, err);
+
+        if (!controller.signal.aborted) {
+          setError(err.message);
+          setResults([]);
+          setIsOpen(false);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }, 300); // Increased debounce to 300ms for better UX
+
+    return () => {
+      clearTimeout(debounceTimer);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [query, label, exclude]);
 
   // Click outside to close
   useEffect(() => {
@@ -89,7 +116,7 @@ useEffect(() => {
   const handleSelect = (symbol) => {
     console.log(`[${label}] Selected:`, symbol);
     onChange(symbol);
-    setQuery("");
+    setQuery(symbol);
     setIsOpen(false);
     setResults([]);
   };
@@ -100,7 +127,7 @@ useEffect(() => {
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
-        setHighlightedIndex((prev) => 
+        setHighlightedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : prev
         );
         break;
