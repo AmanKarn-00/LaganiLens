@@ -144,7 +144,7 @@ jupyter notebook
 
 * [@prazzx](https://github.com/prazzx)
 * [@AmanKarn-00](https://github.com/AmanKarn-00)
-* [@coderag10](https://github.com/coderag10
+* [@coderag10](https://github.com/coderag10)
 * [@Solta420](https://github.com/Solta420)
 ---
 
