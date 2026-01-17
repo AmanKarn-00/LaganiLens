@@ -1,84 +1,42 @@
-import fs from "fs";
-import path from "path";
-import csv from "csv-parser";
+import mongoose from "mongoose";
 
-import connectDB from "./Models/db.js";
-import NepseStock from "./Models/NEPSEdata.js";
+const historicalDataSchema = new mongoose.Schema({
+  symbol: { type: String, required: true, index: true },
+  date: { type: Date, required: true, index: true },
+  
+  // Basic Price Data
+  open: Number,
+  high: Number,
+  low: Number,
+  close: Number,
+  volume: Number,
+  
+  // Advanced Data (Added based on your importer)
+  conf: String,                 // "Conf." field (not cleaned in your code, so String)
+  ltp: Number,                  // Last Traded Price
+  closeLTPDiff: Number,         // "Close - LTP"
+  closeLTPDiffPercent: Number,  // "Close - LTP %"
+  vwap: Number,                 // Volume Weighted Average Price
+  prevClose: Number,            // "Prev. Close"
+  turnover: Number,             // "Turnover"
+  transactions: Number,         // "Trans."
+  
+  // Statistics & Moving Averages
+  diff: Number,
+  range: Number,
+  diffPercent: Number,          // "Diff %"
+  rangePercent: Number,         // "Range %"
+  vwapPercent: Number,          // "VWAP %"
+  movingAvg120: Number,         // "120 Days"
+  movingAvg180: Number,         // "180 Days"
+  high52Weeks: Number,          // "52 Weeks High"
+  low52Weeks: Number            // "52 Weeks Low"
+});
 
-function cleanNumber(value) {
-  if (value === null || value === undefined) return null;
-  if (typeof value === "string") {
-    value = value.replace(/,/g, "").trim();
-    if (value === "-" || value === "") return null;
-  }
-  return Number(value);
-}
+// Create a compound index to ensure one record per symbol per date
+// This prevents duplicate entries if you run the importer twice
+historicalDataSchema.index({ symbol: 1, date: 1 }, { unique: true });
 
-export const importCSVData = async (folderPath = "./combined_csv") => {
-  await connectDB();
+const HistoricalData = mongoose.models.HistoricalData || mongoose.model("HistoricalData", historicalDataSchema);
 
-  const files = fs
-    .readdirSync(folderPath)
-    .filter(f => path.extname(f) === ".csv");
-
-  for (const file of files) {
-    const results = [];
-
-   const filename = path.basename(file, ".csv");
-   const normalizedDate = filename.replace(/_/g, "-");
-
-const [year, month, day] = normalizedDate.split("-");
-const fileDate = new Date(Date.UTC(year, month - 1, day));
-
-if (isNaN(fileDate)) {
-  console.warn(`Skipping ${file}: invalid date format`);
-  continue;
-}
-
-
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(path.join(folderPath, file))
-        .pipe(csv())
-        .on("data", row => {
-          results.push({
-            symbol: row["Symbol"],
-            conf: row["Conf."],
-            open: cleanNumber(row["Open"]),
-            high: cleanNumber(row["High"]),
-            low: cleanNumber(row["Low"]),
-            close: cleanNumber(row["Close"]),
-            ltp: cleanNumber(row["LTP"]),
-            closeLTPDiff: cleanNumber(row["Close - LTP"]),
-            closeLTPDiffPercent: cleanNumber(row["Close - LTP %"]),
-            vwap: cleanNumber(row["VWAP"]),
-            volume: cleanNumber(row["Vol"]),
-            prevClose: cleanNumber(row["Prev. Close"]),
-            turnover: cleanNumber(row["Turnover"]),
-            transactions: cleanNumber(row["Trans."]),
-            diff: cleanNumber(row["Diff"]),
-            range: cleanNumber(row["Range"]),
-            diffPercent: cleanNumber(row["Diff %"]),
-            rangePercent: cleanNumber(row["Range %"]),
-            vwapPercent: cleanNumber(row["VWAP %"]),
-            movingAvg120: cleanNumber(row["120 Days"]),
-            movingAvg180: cleanNumber(row["180 Days"]),
-            high52Weeks: cleanNumber(row["52 Weeks High"]),
-            low52Weeks: cleanNumber(row["52 Weeks Low"]),
-            date: fileDate
-          });
-        })
-        .on("end", async () => {
-          try {
-            await NepseStock.insertMany(results, { ordered: false });
-            console.log(`Inserted ${results.length} rows from ${file}`);
-            resolve();
-          } catch (err) {
-            reject(err);
-          }
-        })
-        .on("error", reject);
-    });
-  }
-
-  console.log(" All CSV files imported");
-};
+export default HistoricalData;
