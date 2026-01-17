@@ -174,6 +174,55 @@ const Homepage = () => {
   </button>
 </div>
 
+{/* Top Users Card */}
+<div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-up">
+  <div className="flex items-center gap-3 mb-4">
+    <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl">
+      <svg
+        className="w-6 h-6 text-white"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+        />
+      </svg>
+    </div>
+    <h2 className="text-2xl font-bold text-gray-900">
+      Top Users
+    </h2>
+  </div>
+
+  <p className="text-gray-600 mb-4 leading-relaxed">
+    Most active users based on predictions, comparisons, and platform engagement.
+  </p>
+
+
+  <button
+    className="group/btn bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
+  >
+    View Leaderboard
+    <svg
+      className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13 7l5 5m0 0l-5 5m5-5H6"
+      />
+    </svg>
+  </button>
+</div>
+
+
         </div>
       </div>
     </div>

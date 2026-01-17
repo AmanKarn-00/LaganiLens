@@ -5,6 +5,7 @@ import { auth } from "@/firebase";
 import { SignupForm } from "@/components/signup-form";
 
 const Signup = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -29,16 +30,25 @@ const Signup = () => {
     }
 
     setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("User signed up:", userCredential.user);
-      navigate("/homepage");
-    } catch (err) {
-      console.error("Signup error:", err);
-      setError(err.message || "Failed to create account. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUid = userCredential.user.uid;
+    console.log("User signed up:", userCredential.user);
+
+   
+    await fetch("http://localhost:5000/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ firebaseUid, name, email }),
+    });
+
+    navigate("/homepage");
+  } catch (err) {
+    console.error("Signup error:", err);
+    setError(err.message || "Failed to create account. Please try again.");
+  } finally {
+    setLoading(false);
+  }
   };
 
   // Handles Google Sign-In
@@ -87,18 +97,21 @@ const Signup = () => {
   return (
     <div className="bg-muted flex min-h-screen flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
-        <SignupForm
-          email={email}
-          setEmail={setEmail}
-          password={password}
-          setPassword={setPassword}
-          confirmPassword={confirmPassword}
-          setConfirmPassword={setConfirmPassword}
-          onSubmit={handleSignup}
-          onGoogleSignIn={handleGoogleSignIn}
-          error={error}
-          loading={loading}
-        />
+       <SignupForm
+  name={name}
+  setName={setName}
+  email={email}
+  setEmail={setEmail}
+  password={password}
+  setPassword={setPassword}
+  confirmPassword={confirmPassword}
+  setConfirmPassword={setConfirmPassword}
+  onSubmit={handleSignup}
+  onGoogleSignIn={handleGoogleSignIn}
+  error={error}
+  loading={loading}
+/>
+
         <div className="text-center mt-4 text-sm text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="text-blue-600 hover:text-blue-700 font-semibold">

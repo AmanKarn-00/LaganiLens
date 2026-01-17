@@ -5,6 +5,8 @@ import connectDB from "./Models/db.js";
 import { importCSVData } from "./Historicaldata.js";
 import stockRoutes from "./Routes/stockRoutes.js";
 import predictionRoutes from "./Routes/predictionRoutes.js";
+import usersRoute from "./Routes/userRoute.js"
+import portfolioRoute from "./Routes/Portfolio.js"
 
 dotenv.config();
 connectDB();
@@ -18,6 +20,8 @@ app.use(express.json());
 //Routes
 app.use("/api/predictions", predictionRoutes);  // Changed path
 app.use("/api/stocks", stockRoutes);
+app.use("/api/users", usersRoute);
+app.use("/api/portfolio", portfolioRoute);
 
 // Test route
 app.get("/", (req, res) => {
