@@ -15,6 +15,8 @@ import {
   Database,
   ArrowRight,
   User,
+  Wallet,
+  Briefcase,
 } from "lucide-react"
 
 const Homepage = () => {
@@ -32,14 +34,14 @@ const Homepage = () => {
               <h1 className="text-3xl font-bold tracking-tight">
                 Dashboard
               </h1>
-              {user?. email && (
+              {user?.email && (
                 <p className="text-muted-foreground flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {user.email}
                 </p>
               )}
             </div>
-            <Badge variant="secondary" className="text-sm">
+            <Badge variant="secondary" className="text-sm px-4 py-1">
               NEPSE Analytics
             </Badge>
           </div>
@@ -55,7 +57,7 @@ const Homepage = () => {
               <Database className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">--</div>
+              <div className="text-2xl font-bold">3+ Years</div>
               <p className="text-xs text-muted-foreground">Historical records</p>
             </CardContent>
           </Card>
@@ -84,57 +86,60 @@ const Homepage = () => {
         </div>
 
         {/* Quick Actions Grid */}
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           
-          {/* NEPSE Data Analysis */}
-          <Card className="group hover:shadow-lg transition-shadow">
+          {/* My Portfolio - NEW */}
+          <Card className="group hover:shadow-lg transition-all duration-200 border-primary/20 hover:border-primary/40">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
-                  <BarChart3 className="h-5 w-5 text-primary" />
+                  <Briefcase className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <CardTitle>NEPSE Data Analysis</CardTitle>
+                  <CardTitle className="text-lg">My Portfolio</CardTitle>
                   <CardDescription>
-                    Access historical NEPSE data and analytics
+                    Manage your investments
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Explore historical NEPSE data, perform analysis, and track market trends with comprehensive data visualization.
+                Track your stock holdings, monitor investments, and manage your NEPSE portfolio in one place.
               </p>
-              <Button className="w-full sm:w-auto">
-                View Data
+              <Button 
+                onClick={() => navigate("/portfolio")}
+                className="w-full"
+              >
+                View Portfolio
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
           </Card>
 
           {/* ML Predictions */}
-          <Card className="group hover:shadow-lg transition-shadow">
+          <Card className="group hover:shadow-lg transition-all duration-200">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-purple-500/10">
                   <Brain className="h-5 w-5 text-purple-500" />
                 </div>
                 <div>
-                  <CardTitle>ML Predictions</CardTitle>
+                  <CardTitle className="text-lg">ML Predictions</CardTitle>
                   <CardDescription>
-                    AI-powered stock price forecasts
+                    AI-powered forecasts
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Explore machine learning model predictions and trend analysis for NEPSE stocks using ARIMA forecasting.
+                Explore machine learning predictions and trend analysis for NEPSE stocks using ARIMA forecasting.
               </p>
               <Button 
                 onClick={() => navigate("/predictstock")}
                 variant="secondary"
-                className="w-full sm:w-auto"
+                className="w-full"
               >
                 View Predictions
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -143,28 +148,28 @@ const Homepage = () => {
           </Card>
 
           {/* Compare Stocks */}
-          <Card className="group hover:shadow-lg transition-shadow">
+          <Card className="group hover:shadow-lg transition-all duration-200">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-emerald-500/10">
                   <GitCompare className="h-5 w-5 text-emerald-500" />
                 </div>
                 <div>
-                  <CardTitle>Compare Stocks</CardTitle>
+                  <CardTitle className="text-lg">Compare Stocks</CardTitle>
                   <CardDescription>
-                    Side-by-side stock comparison
+                    Side-by-side analysis
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Compare NEPSE stocks using key financial metrics like price, volume, P/E ratio, and 52-week performance. 
+                Compare NEPSE stocks using key metrics like price, volume, and 52-week performance.
               </p>
               <Button 
                 onClick={() => navigate("/comparestocks")}
                 variant="secondary"
-                className="w-full sm:w-auto"
+                className="w-full"
               >
                 Compare Now
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -172,31 +177,90 @@ const Homepage = () => {
             </CardContent>
           </Card>
 
-          {/* Leaderboard */}
-          <Card className="group hover:shadow-lg transition-shadow">
+          {/* NEPSE Data Analysis */}
+          <Card className="group hover:shadow-lg transition-all duration-200">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-amber-500/10">
-                  <Trophy className="h-5 w-5 text-amber-500" />
+                <div className="p-2 rounded-lg bg-blue-500/10">
+                  <BarChart3 className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <CardTitle>Leaderboard</CardTitle>
+                  <CardTitle className="text-lg">Market Data</CardTitle>
                   <CardDescription>
-                    Top performing users
+                    Historical analytics
                   </CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                View the most successful investors ranked by portfolio performance and net profit.
+                Access historical NEPSE data and perform comprehensive market analysis.
+              </p>
+              <Button 
+                variant="secondary"
+                className="w-full"
+              >
+                View Data
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Leaderboard */}
+          <Card className="group hover:shadow-lg transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Leaderboard</CardTitle>
+                  <CardDescription>
+                    Top performers
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                View the most successful investors ranked by portfolio performance.
               </p>
               <Button 
                 onClick={() => navigate("/leaderboard")}
                 variant="secondary"
-                className="w-full sm:w-auto"
+                className="w-full"
               >
-                View Leaderboard
+                View Rankings
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats */}
+          <Card className="group hover:shadow-lg transition-all duration-200">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-rose-500/10">
+                  <Wallet className="h-5 w-5 text-rose-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Investment Tips</CardTitle>
+                  <CardDescription>
+                    Learn & grow
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get insights and tips for better investment decisions in the NEPSE market.
+              </p>
+              <Button 
+                onClick={() => navigate("/about")}
+                variant="outline"
+                className="w-full"
+              >
+                Learn More
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
