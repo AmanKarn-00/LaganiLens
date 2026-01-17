@@ -7,6 +7,8 @@ import stockRoutes from "./Routes/stockRoutes.js";
 import predictionRoutes from "./Routes/predictionRoutes.js";
 import usersRoute from "./Routes/userRoute.js"
 import portfolioRoute from "./Routes/Portfolio.js"
+import todayprice from "./Routes/TodayPrice.js"
+import Leaderboard from "./Routes/Leaderboard.js"
 
 dotenv.config();
 connectDB();
@@ -22,6 +24,8 @@ app.use("/api/predictions", predictionRoutes);  // Changed path
 app.use("/api/stocks", stockRoutes);
 app.use("/api/users", usersRoute);
 app.use("/api/portfolio", portfolioRoute);
+app.use("/api/stocks/price", todayprice);
+app.use("/api/leaderboard",Leaderboard)
 
 // Test route
 app.get("/", (req, res) => {

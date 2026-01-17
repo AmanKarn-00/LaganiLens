@@ -202,7 +202,7 @@ const Homepage = () => {
   </p>
 
 
-  <button
+  <button onClick={() =>navigate ("/leaderboard")}
     className="group/btn bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
   >
     View Leaderboard

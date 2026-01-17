@@ -8,8 +8,8 @@ const nepseSchema = new mongoose.Schema({
   low: { type: Number },
   close: { type: Number },
   ltp: { type: Number },
-  closeLTPDiff: { type: Number },      // Close - LTP
-  closeLTPDiffPercent: { type: Number }, // Close - LTP %
+  closeLTPDiff: { type: Number },
+  closeLTPDiffPercent: { type: Number },
   vwap: { type: Number },
   volume: { type: Number },
   prevClose: { type: Number },
@@ -24,9 +24,12 @@ const nepseSchema = new mongoose.Schema({
   movingAvg180: { type: Number },
   high52Weeks: { type: Number },
   low52Weeks: { type: Number },
-  date: {type: Date},
+  date: { type: Date },
 }, { timestamps: true });
 
 nepseSchema.index({ symbol: 1, date: 1 }, { unique: true });
 
-export default mongoose.model("NepseStock", nepseSchema);
+// ✅ Conditional model export
+const NepseStock = mongoose.models.NepseStock || mongoose.model("NepseStock", nepseSchema);
+
+export default NepseStock;
