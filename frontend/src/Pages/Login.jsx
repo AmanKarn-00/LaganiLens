@@ -28,6 +28,8 @@ const Login = () => {
         setError("Incorrect password.")
       } else if (err.code === 'auth/invalid-email') {
         setError("Invalid email address.")
+      } else if (err.code === 'auth/invalid-credential') {
+        setError("Invalid email or password.")
       } else {
         setError(err.message || "Login failed. Please try again.")
       }
@@ -64,7 +66,6 @@ const Login = () => {
           }),
         })
       } catch (backendErr) {
-        // User might already exist, which is fine for login
         console.log("Backend sync:", backendErr)
       }
 
@@ -73,21 +74,26 @@ const Login = () => {
       console.error("Google sign-in error:", err)
       
       if (err.code === 'auth/popup-closed-by-user') {
-        setError("Sign-in cancelled. Please try again.")
-      } else if (err. code === 'auth/popup-blocked') {
+        setError("Sign-in cancelled.  Please try again.")
+      } else if (err.code === 'auth/popup-blocked') {
         setError("Popup was blocked. Please allow popups for this site.")
       } else if (err.code === 'auth/account-exists-with-different-credential') {
         setError("An account already exists with the same email address.")
       } else {
-        setError(err.message || "Failed to sign in with Google. Please try again.")
+        setError(err. message || "Failed to sign in with Google. Please try again.")
       }
     } finally {
       setLoading(false)
     }
   }
 
+  // Navigate to forgot password
+  const handleForgotPassword = () => {
+    navigate("/forgot-password")
+  }
+
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md: p-10">
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
         <LoginForm
           email={email}
@@ -96,13 +102,14 @@ const Login = () => {
           setPassword={setPassword}
           onSubmit={handleLogin}
           onGoogleSignIn={handleGoogleSignIn}
+          onForgotPassword={handleForgotPassword}
           error={error}
           loading={loading}
         />
 
-        <div className="text-center mt-4 text-sm text-gray-600">
+        <div className="text-center mt-4 text-sm text-muted-foreground">
           Don't have an account?{" "}
-          <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
+          <Link to="/signup" className="text-primary font-semibold hover:underline">
             Sign up here
           </Link>
         </div>
