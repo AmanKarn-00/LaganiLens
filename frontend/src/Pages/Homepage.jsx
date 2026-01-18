@@ -1,227 +1,206 @@
-import React from 'react'
 import { auth } from '../firebase'
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"
+
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+
+import {
+  BarChart3,
+  Brain,
+  GitCompare,
+  Trophy,
+  TrendingUp,
+  Database,
+  ArrowRight,
+  User,
+} from "lucide-react"
 
 const Homepage = () => {
   const user = auth.currentUser
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute top-0 right-0 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-float" style={{animationDelay: '3s'}}></div>
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-        {/* Welcome Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8 border border-white/20 animate-fade-in">
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        
+        {/* Welcome Header */}
+        <div className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                Welcome to LaganiLens Dashboard
+            <div className="space-y-1">
+              <h1 className="text-3xl font-bold tracking-tight">
+                Dashboard
               </h1>
-              <p className="text-gray-600 text-lg">
-                {user?.email && (
-                  <span className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    {user.email}
-                  </span>
-                )}
-              </p>
+              {user?. email && (
+                <p className="text-muted-foreground flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {user.email}
+                </p>
+              )}
             </div>
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold shadow-lg">
+            <Badge variant="secondary" className="text-sm">
               NEPSE Analytics
-            </div>
+            </Badge>
           </div>
         </div>
+
+        <Separator className="mb-8" />
 
         {/* Stats Grid */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Data Points</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">--</p>
-                <p className="text-xs text-gray-500 mt-1">Historical records</p>
-              </div>
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-4 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-              </div>
-            </div>
-          </div>
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Data Points</CardTitle>
+              <Database className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">--</div>
+              <p className="text-xs text-muted-foreground">Historical records</p>
+            </CardContent>
+          </Card>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in" style={{animationDelay: '0.1s'}}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">ML Models</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">--</p>
-                <p className="text-xs text-gray-500 mt-1">Active models</p>
-              </div>
-              <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-4 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">ML Models</CardTitle>
+              <Brain className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">ARIMA</div>
+              <p className="text-xs text-muted-foreground">Active prediction model</p>
+            </CardContent>
+          </Card>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-fade-in" style={{animationDelay: '0.2s'}}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-600 text-sm font-medium mb-1">Predictions</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">--</p>
-                <p className="text-xs text-gray-500 mt-1">Forecasts generated</p>
-              </div>
-              <div className="bg-gradient-to-br from-purple-500 to-purple-600 p-4 rounded-xl shadow-lg group-hover:scale-110 transition-transform">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Predictions</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">30 Days</div>
+              <p className="text-xs text-muted-foreground">Forecast horizon</p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content Area */}
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-left">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-3 rounded-xl">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
+        {/* Quick Actions Grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          
+          {/* NEPSE Data Analysis */}
+          <Card className="group hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <BarChart3 className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <CardTitle>NEPSE Data Analysis</CardTitle>
+                  <CardDescription>
+                    Access historical NEPSE data and analytics
+                  </CardDescription>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">NEPSE Data Analysis</h2>
-            </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Access historical NEPSE data, perform analysis, and generate predictions using machine learning models.
-            </p>
-            <button   className="group/btn bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
-              View Data
-              <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Explore historical NEPSE data, perform analysis, and track market trends with comprehensive data visualization.
+              </p>
+              <Button className="w-full sm:w-auto">
+                View Data
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-right">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-xl">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
+          {/* ML Predictions */}
+          <Card className="group hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-500/10">
+                  <Brain className="h-5 w-5 text-purple-500" />
+                </div>
+                <div>
+                  <CardTitle>ML Predictions</CardTitle>
+                  <CardDescription>
+                    AI-powered stock price forecasts
+                  </CardDescription>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">ML Predictions</h2>
-            </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              Explore machine learning model predictions and trend analysis for NEPSE stocks.
-            </p>
-            <button onClick={() =>navigate ("/predictstock")} className="group/btn bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2">
-              View Predictions
-              <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </button>
-          </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Explore machine learning model predictions and trend analysis for NEPSE stocks using ARIMA forecasting.
+              </p>
+              <Button 
+                onClick={() => navigate("/predictstock")}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                View Predictions
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
 
-          <div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-up">
-  <div className="flex items-center gap-3 mb-4">
-    <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-3 rounded-xl">
-      <svg
-        className="w-6 h-6 text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M9 17v-6m6 6V7M5 21h14"
-        />
-      </svg>
-    </div>
-    <h2 className="text-2xl font-bold text-gray-900">
-      Compare Stocks
-    </h2>
-  </div>
+          {/* Compare Stocks */}
+          <Card className="group hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/10">
+                  <GitCompare className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div>
+                  <CardTitle>Compare Stocks</CardTitle>
+                  <CardDescription>
+                    Side-by-side stock comparison
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Compare NEPSE stocks using key financial metrics like price, volume, P/E ratio, and 52-week performance. 
+              </p>
+              <Button 
+                onClick={() => navigate("/comparestocks")}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                Compare Now
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
 
-  <p className="text-gray-600 mb-6 leading-relaxed">
-    Compare NEPSE stocks side-by-side using key financial metrics
-    like price, volume, P/E ratio, and 52-week performance.
-  </p>
-
-  <button
-    onClick={() =>navigate ("/comparestocks")}
-    className="group/btn bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
-  >
-    Compare Now
-    <svg
-      className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 7l5 5m0 0l-5 5m5-5H6"
-      />
-    </svg>
-  </button>
-</div>
-
-{/* Top Users Card */}
-<div className="group bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 border border-white/20 hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-in-up">
-  <div className="flex items-center gap-3 mb-4">
-    <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl">
-      <svg
-        className="w-6 h-6 text-white"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-        />
-      </svg>
-    </div>
-    <h2 className="text-2xl font-bold text-gray-900">
-      Top Users
-    </h2>
-  </div>
-
-  <p className="text-gray-600 mb-4 leading-relaxed">
-    Most active users based on predictions, comparisons, and platform engagement.
-  </p>
-
-
-  <button onClick={() =>navigate ("/leaderboard")}
-    className="group/btn bg-gradient-to-r from-amber-600 to-orange-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-amber-700 hover:to-orange-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
-  >
-    View Leaderboard
-    <svg
-      className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 7l5 5m0 0l-5 5m5-5H6"
-      />
-    </svg>
-  </button>
-</div>
-
+          {/* Leaderboard */}
+          <Card className="group hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-500/10">
+                  <Trophy className="h-5 w-5 text-amber-500" />
+                </div>
+                <div>
+                  <CardTitle>Leaderboard</CardTitle>
+                  <CardDescription>
+                    Top performing users
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                View the most successful investors ranked by portfolio performance and net profit.
+              </p>
+              <Button 
+                onClick={() => navigate("/leaderboard")}
+                variant="secondary"
+                className="w-full sm:w-auto"
+              >
+                View Leaderboard
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
 
         </div>
       </div>
