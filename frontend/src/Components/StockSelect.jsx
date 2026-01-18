@@ -1,240 +1,261 @@
-import { useEffect, useState, useRef } from "react";
-import { Card } from "@/components/ui/card";
+import { useEffect, useState, useRef } from "react"
+import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
 
-export default function StockSelect({ label, value, onChange, exclude }) {
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
-  const cacheRef = useRef({});
-  const abortControllerRef = useRef(null);
+export default function StockSelect({ label, value, onChange, exclude, className }) {
+  const [query, setQuery] = useState(value || "")
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [isOpen, setIsOpen] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(0)
+  const inputRef = useRef(null)
+  const dropdownRef = useRef(null)
+  const cacheRef = useRef({})
+  const abortControllerRef = useRef(null)
+
+  // Parse excluded stocks (can be comma-separated string or array)
+  const excludedSymbols = Array.isArray(exclude) 
+    ? exclude 
+    : (exclude ?  exclude.split(",").map(s => s.trim()).filter(Boolean) : [])
+
+  // Sync query with value prop when it changes externally
+  useEffect(() => {
+    if (value) {
+      setQuery(value)
+    } else {
+      setQuery("")
+    }
+  }, [value])
 
   useEffect(() => {
-    const trimmedQuery = query.trim();
+    const trimmedQuery = query.trim()
 
     // Cancel any in-flight request
     if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+      abortControllerRef.current.abort()
     }
 
     // If query is empty, clear results and close dropdown
     if (!trimmedQuery) {
-      setResults([]);
-      setIsOpen(false);
-      setLoading(false);
-      return;
+      setResults([])
+      setIsOpen(false)
+      setLoading(false)
+      return
+    }
+
+    // Don't search if query matches current value (user just selected)
+    if (trimmedQuery === value) {
+      setResults([])
+      setIsOpen(false)
+      setLoading(false)
+      return
     }
 
     // Check cache first
     if (cacheRef.current[trimmedQuery]) {
       const filtered = cacheRef.current[trimmedQuery].filter(
-        (s) => s.symbol !== exclude
-      );
-      setResults(filtered);
-      setIsOpen(filtered.length > 0);
-      setHighlightedIndex(0);
-      setLoading(false);
-      return;
+        (s) => !excludedSymbols.includes(s.symbol)
+      )
+      setResults(filtered)
+      setIsOpen(filtered.length > 0)
+      setHighlightedIndex(0)
+      setLoading(false)
+      return
     }
 
     const debounceTimer = setTimeout(async () => {
-      // Create new controller for this request
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
+      const controller = new AbortController()
+      abortControllerRef.current = controller
 
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
       try {
-        const apiBase = "";
-        const apiUrl = `${apiBase}/api/stocks/search?q=${encodeURIComponent(
-          trimmedQuery
-        )}`;
-        const res = await fetch(apiUrl, { signal: controller.signal });
+        const apiUrl = `/api/stocks/search?q=${encodeURIComponent(trimmedQuery)}`
+        const res = await fetch(apiUrl, { signal: controller.signal })
 
-        if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+        if (!res.ok) throw new Error(`Search failed: ${res.status}`)
 
-        const data = await res.json();
-        let stockList = Array.isArray(data) ? data : data.stocks || [];
+        const data = await res.json()
+        let stockList = Array.isArray(data) ? data : data.stocks || []
 
         // Cache the results
-        cacheRef.current[trimmedQuery] = stockList;
+        cacheRef.current[trimmedQuery] = stockList
 
-        // Filter excluded stock
-        const filtered = stockList.filter((s) => s.symbol !== exclude);
+        // Filter excluded stocks
+        const filtered = stockList. filter((s) => !excludedSymbols.includes(s. symbol))
 
-        // Only update if this request wasn't aborted
         if (!controller.signal.aborted) {
-          setResults(filtered);
-          setIsOpen(filtered.length > 0);
-          setHighlightedIndex(0);
+          setResults(filtered)
+          setIsOpen(filtered. length > 0)
+          setHighlightedIndex(0)
         }
       } catch (err) {
-        if (err.name === "AbortError") return;
-        console.error(`[${label}] Search error:`, err);
+        if (err.name === "AbortError") return
+        console.error(`[StockSelect] Search error:`, err)
 
         if (!controller.signal.aborted) {
-          setError(err.message);
-          setResults([]);
-          setIsOpen(false);
+          setError(err.message)
+          setResults([])
+          setIsOpen(false)
         }
       } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false);
+        if (!controller. signal.aborted) {
+          setLoading(false)
         }
       }
-    }, 300); // Increased debounce to 300ms for better UX
+    }, 300)
 
     return () => {
-      clearTimeout(debounceTimer);
+      clearTimeout(debounceTimer)
       if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+        abortControllerRef.current.abort()
       }
-    };
-  }, [query, label, exclude]);
+    }
+  }, [query, exclude, value])
 
   // Click outside to close
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (
         dropdownRef.current &&
-        !dropdownRef.current.contains(e.target) &&
+        !dropdownRef.current. contains(e.target) &&
         !inputRef.current?.contains(e.target)
       ) {
-        setIsOpen(false);
+        setIsOpen(false)
       }
-    };
+    }
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const handleSelect = (symbol) => {
-    console.log(`[${label}] Selected:`, symbol);
-    onChange(symbol);
-    setQuery(symbol);
-    setIsOpen(false);
-    setResults([]);
-  };
+    console.log(`[StockSelect] Selected: `, symbol)
+    onChange(symbol)
+    setQuery(symbol)
+    setIsOpen(false)
+    setResults([])
+  }
+
+  const handleClear = () => {
+    onChange(null)
+    setQuery("")
+    setResults([])
+    setIsOpen(false)
+    inputRef.current?.focus()
+  }
 
   const handleKeyDown = (e) => {
-    if (!isOpen || results.length === 0) return;
+    if (!isOpen || results.length === 0) return
 
     switch (e.key) {
       case "ArrowDown":
-        e.preventDefault();
+        e.preventDefault()
         setHighlightedIndex((prev) =>
           prev < results.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-        break;
+        )
+        break
+      case "ArrowUp": 
+        e.preventDefault()
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev))
+        break
       case "Enter":
-        e.preventDefault();
+        e.preventDefault()
         if (results[highlightedIndex]) {
-          handleSelect(results[highlightedIndex].symbol);
+          handleSelect(results[highlightedIndex]. symbol)
         }
-        break;
-      case "Escape":
-        e.preventDefault();
-        setIsOpen(false);
-        break;
+        break
+      case "Escape": 
+        e.preventDefault()
+        setIsOpen(false)
+        break
     }
-  };
+  }
 
   return (
-    <Card className="p-4">
-      <label className="text-sm mb-2 font-medium block">{label}</label>
-
+    <div className={cn("relative", className)}>
       <div className="relative">
-        <input
+        <Input
           ref={inputRef}
           type="text"
           placeholder="Type stock symbol (e.g., NABIL)..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => setQuery(e.target.value. toUpperCase())}
           onKeyDown={handleKeyDown}
           onFocus={() => {
-            if (results.length > 0) setIsOpen(true);
+            if (results.length > 0 && ! value) setIsOpen(true)
           }}
           autoComplete="off"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
         />
 
+        {/* Loading spinner */}
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
           </div>
         )}
 
+        {/* Clear button when value is selected */}
+        {value && ! loading && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        )}
+
+        {/* Dropdown results */}
         {isOpen && results.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-64 overflow-y-auto"
+            className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-64 overflow-y-auto"
           >
             {results.map((stock, index) => (
               <div
                 key={stock.symbol}
                 onClick={() => handleSelect(stock.symbol)}
                 onMouseEnter={() => setHighlightedIndex(index)}
-                className={`px-3 py-2 cursor-pointer flex items-center justify-between ${
+                className={cn(
+                  "px-3 py-2 cursor-pointer flex items-center justify-between text-sm",
                   index === highlightedIndex
-                    ? "bg-blue-100"
-                    : "hover:bg-gray-100"
-                }`}
-              >
-                <span className="font-mono font-medium">{stock.symbol}</span>
-                {stock.lastTradeDate && (
-                  <span className="text-xs text-gray-500">
-                    {new Date(stock.lastTradeDate).toLocaleDateString()}
-                  </span>
+                    ? "bg-accent text-accent-foreground"
+                    :  "hover:bg-muted"
                 )}
+              >
+                <span className="font-mono font-medium">{stock. symbol}</span>
               </div>
             ))}
           </div>
         )}
 
-        {isOpen && query && results.length === 0 && !loading && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-4 text-center text-sm text-gray-500">
+        {/* No results message */}
+        {isOpen && query && query !== value && results.length === 0 && !loading && (
+          <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg p-4 text-center text-sm text-muted-foreground">
             No stocks found matching "{query}"
           </div>
         )}
       </div>
 
+      {/* Error message */}
       {error && (
-        <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded">
+        <div className="mt-2 text-xs text-destructive bg-destructive/10 p-2 rounded">
           {error}
         </div>
       )}
 
-      {value ? (
-        <div className="mt-3 p-2 bg-green-50 rounded border border-green-200">
-          <p className="text-xs text-green-700 flex items-center justify-between">
-            <span>
-              Selected: <strong className="font-mono">{value}</strong>
-            </span>
-            <button
-              onClick={() => {
-                onChange(null);
-                setQuery("");
-              }}
-              className="text-green-600 hover:text-green-800 underline text-xs"
-            >
-              Clear
-            </button>
-          </p>
-        </div>
-      ) : (
-        <div className="mt-3 p-2 bg-gray-50 rounded border border-gray-200">
-          <p className="text-xs text-gray-500">No stock selected</p>
+      {/* Selected stock indicator */}
+      {value && (
+        <div className="mt-2 text-xs text-muted-foreground">
+          Selected: <span className="font-mono font-semibold text-foreground">{value}</span>
         </div>
       )}
-    </Card>
-  );
+    </div>
+  )
 }

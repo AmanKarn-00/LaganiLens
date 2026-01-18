@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import StockSelect from "@/components/StockSelect"
-import { Plus, Trash2, TrendingUp, Wallet, Package, ArrowLeft } from "lucide-react"
+import { Plus, Trash2, TrendingUp, Wallet, Package, ArrowLeft, RefreshCw } from "lucide-react"
 import { auth } from "@/firebase"
 
 const Portfolio = () => {
@@ -16,6 +16,7 @@ const Portfolio = () => {
   const [quantity, setQuantity] = useState("")
   const [purchasePrice, setPurchasePrice] = useState("")
   const [loading, setLoading] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
   const [error, setError] = useState("")
 
@@ -23,22 +24,36 @@ const Portfolio = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (user) loadPortfolio()
+    if (user) {
+      loadPortfolio()
+    } else {
+      setPageLoading(false)
+    }
   }, [user])
 
   const loadPortfolio = async () => {
+    setPageLoading(true)
     try {
-      const response = await fetch(`http://localhost:5000/api/portfolio/${user. uid}`)
+      const response = await fetch(`http://localhost:5000/api/portfolio/${user.uid}`)
       if (response.ok) {
         const data = await response.json()
         setPortfolio((data.stocks || []).filter(s => s && s.symbol))
+      } else if (response.status === 404) {
+        // User doesn't have a portfolio yet - that's okay
+        setPortfolio([])
+      } else {
+        console.error("Failed to load portfolio:", response.status)
       }
     } catch (err) {
       console.error("Error loading portfolio:", err)
+    } finally {
+      setPageLoading(false)
     }
   }
 
-  const handleAddStock = async () => {
+  const handleAddStock = async (e) => {
+    e?.preventDefault()
+    
     if (!selectedStock || !quantity || !purchasePrice) {
       setError("Please fill in all fields")
       return
@@ -47,8 +62,13 @@ const Portfolio = () => {
     const qty = parseInt(quantity)
     const price = parseFloat(purchasePrice)
 
-    if (qty <= 0 || price <= 0) {
-      setError("Quantity and price must be positive numbers")
+    if (isNaN(qty) || qty <= 0) {
+      setError("Please enter a valid quantity")
+      return
+    }
+
+    if (isNaN(price) || price <= 0) {
+      setError("Please enter a valid price")
       return
     }
 
@@ -56,11 +76,16 @@ const Portfolio = () => {
     setError("")
 
     try {
-      const stockPayload = { symbol: selectedStock, quantity: qty, purchasePrice:  price }
+      const stockPayload = { 
+        symbol: selectedStock, 
+        quantity: qty, 
+        purchasePrice: price 
+      }
+      
       const exists = portfolio.find(s => s.symbol === selectedStock)
       const method = exists ? "PUT" : "POST"
       const url = exists
-        ? `http://localhost:5000/api/portfolio/${user. uid}/stock/${selectedStock}`
+        ? `http://localhost:5000/api/portfolio/${user.uid}/stock/${selectedStock}`
         : `http://localhost:5000/api/portfolio/${user.uid}/stock`
 
       const response = await fetch(url, {
@@ -69,14 +94,22 @@ const Portfolio = () => {
         body: JSON.stringify(stockPayload),
       })
 
-      if (!response.ok) throw new Error(exists ? "Failed to update stock" : "Failed to add stock")
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || (exists ? "Failed to update stock" : "Failed to add stock"))
+      }
 
+      // Reload portfolio to get fresh data
       await loadPortfolio()
+      
+      // Reset form
       setSelectedStock(null)
       setQuantity("")
       setPurchasePrice("")
       setShowAddForm(false)
+      setError("")
     } catch (err) {
+      console.error("Error adding/updating stock:", err)
       setError(err.message || "Failed to add/update stock")
     } finally {
       setLoading(false)
@@ -84,24 +117,64 @@ const Portfolio = () => {
   }
 
   const handleRemoveStock = async (symbol) => {
-    if (!window.confirm(`Are you sure you want to remove ${symbol}?`)) return
+    if (! window.confirm(`Are you sure you want to remove ${symbol} from your portfolio?`)) return
 
     try {
       const response = await fetch(`http://localhost:5000/api/portfolio/${user.uid}/stock/${symbol}`, {
         method: "DELETE",
       })
-      if (! response.ok) throw new Error("Failed to remove stock")
+      
+      if (!response.ok) {
+        throw new Error("Failed to remove stock")
+      }
+      
       setPortfolio(prev => prev.filter(s => s.symbol !== symbol))
     } catch (err) {
+      console.error("Error removing stock:", err)
       setError(err.message || "Failed to remove stock")
     }
   }
 
-  const calculateTotalInvestment = () => {
-    return portfolio.reduce((sum, s) => sum + (s.totalInvested || 0), 0)
+  const handleCancelAdd = () => {
+    setShowAddForm(false)
+    setSelectedStock(null)
+    setQuantity("")
+    setPurchasePrice("")
+    setError("")
   }
 
-  const excludedStocks = portfolio.map(s => s.symbol).join(",")
+  const calculateTotalInvestment = () => {
+    return portfolio.reduce((sum, s) => {
+      const invested = s.totalInvested || (s.quantity * s.purchasePrice) || 0
+      return sum + invested
+    }, 0)
+  }
+
+  const calculateTotalShares = () => {
+    return portfolio.reduce((sum, s) => sum + (s.quantity || 0), 0)
+  }
+
+  // Get list of symbols already in portfolio for exclusion
+  const excludedStocks = portfolio.map(s => s.symbol)
+
+  // Show login prompt if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardHeader className="text-center">
+            <CardTitle>Please Log In</CardTitle>
+            <CardDescription>You need to be logged in to view your portfolio</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button onClick={() => navigate("/login")} className="w-full">
+              Go to Login
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,16 +197,22 @@ const Portfolio = () => {
                 Manage your stock holdings and track investments
               </p>
             </div>
-            <Badge variant="outline" className="text-sm px-4 py-1">
-              {portfolio.length} Holdings
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={loadPortfolio} disabled={pageLoading}>
+                <RefreshCw className={`h-4 w-4 mr-2 ${pageLoading ? 'animate-spin' :  ''}`} />
+                Refresh
+              </Button>
+              <Badge variant="outline" className="text-sm px-4 py-1">
+                {portfolio.length} Holdings
+              </Badge>
+            </div>
           </div>
         </div>
 
         <Separator className="mb-8" />
 
         {/* Summary Cards */}
-        <div className="grid gap-4 md: grid-cols-3 mb-8">
+        <div className="grid gap-4 md:grid-cols-3 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Stocks</CardTitle>
@@ -152,7 +231,7 @@ const Portfolio = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                Rs. {calculateTotalInvestment().toLocaleString("en-NP", { maximumFractionDigits: 2 })}
+                Rs.  {calculateTotalInvestment().toLocaleString("en-NP", { maximumFractionDigits:  2 })}
               </div>
               <p className="text-xs text-muted-foreground">Amount invested</p>
             </CardContent>
@@ -165,7 +244,7 @@ const Portfolio = () => {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {portfolio.reduce((sum, s) => sum + (s.quantity || 0), 0).toLocaleString()}
+                {calculateTotalShares().toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">Units owned</p>
             </CardContent>
@@ -191,62 +270,67 @@ const Portfolio = () => {
                 </div>
               )}
 
-              <div className="grid gap-4 md:grid-cols-3 mb-4">
-                <div className="space-y-2">
-                  <Label>Select Stock</Label>
-                  <StockSelect
-                    value={selectedStock}
-                    onChange={setSelectedStock}
-                    exclude={excludedStocks}
-                  />
+              <form onSubmit={handleAddStock}>
+                <div className="grid gap-4 md:grid-cols-3 mb-4">
+                  <div className="space-y-2">
+                    <Label>Select Stock</Label>
+                    <StockSelect
+                      value={selectedStock}
+                      onChange={setSelectedStock}
+                      exclude={excludedStocks}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input
+                      id="quantity"
+                      type="number"
+                      placeholder="Number of shares"
+                      value={quantity}
+                      onChange={e => setQuantity(e. target.value)}
+                      min="1"
+                      step="1"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="price">Purchase Price (Rs.)</Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      placeholder="Price per share"
+                      value={purchasePrice}
+                      onChange={e => setPurchasePrice(e. target.value)}
+                      min="0.01"
+                      step="0.01"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="quantity">Quantity</Label>
-                  <Input
-                    id="quantity"
-                    type="number"
-                    placeholder="Number of shares"
-                    value={quantity}
-                    onChange={e => setQuantity(e. target.value)}
-                    min="1"
-                  />
+                <div className="flex gap-3">
+                  <Button
+                    type="submit"
+                    disabled={loading || !selectedStock || !quantity || ! purchasePrice}
+                  >
+                    {loading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      "Add to Portfolio"
+                    )}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleCancelAdd}
+                    variant="outline"
+                  >
+                    Cancel
+                  </Button>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price">Purchase Price (Rs.)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    placeholder="Price per share"
-                    value={purchasePrice}
-                    onChange={e => setPurchasePrice(e. target.value)}
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleAddStock}
-                  disabled={loading || !selectedStock || !quantity || ! purchasePrice}
-                >
-                  {loading ? "Saving..." : "Add to Portfolio"}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowAddForm(false)
-                    setSelectedStock(null)
-                    setQuantity("")
-                    setPurchasePrice("")
-                    setError("")
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
         )}
@@ -258,7 +342,12 @@ const Portfolio = () => {
             <CardDescription>Your current stock positions</CardDescription>
           </CardHeader>
           <CardContent>
-            {portfolio.length === 0 ? (
+            {pageLoading ? (
+              <div className="text-center py-12">
+                <RefreshCw className="h-8 w-8 mx-auto text-muted-foreground mb-4 animate-spin" />
+                <p className="text-muted-foreground">Loading portfolio...</p>
+              </div>
+            ) : portfolio.length === 0 ? (
               <div className="text-center py-12">
                 <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No stocks in your portfolio yet. </p>
@@ -277,20 +366,25 @@ const Portfolio = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {portfolio.map((stock, index) =>
-                      stock ?  (
+                    {portfolio.map((stock, index) => {
+                      const avgPrice = stock.avgPurchasePrice || stock.purchasePrice || 0
+                      const totalInvested = stock.totalInvested || (stock.quantity * avgPrice) || 0
+                      
+                      return (
                         <tr key={stock.symbol + index} className="border-b hover:bg-muted/50 transition-colors">
                           <td className="py-4 px-4">
                             <Badge variant="outline" className="font-mono font-semibold">
                               {stock.symbol}
                             </Badge>
                           </td>
-                          <td className="text-right py-4 px-4">{stock.quantity?. toLocaleString()}</td>
                           <td className="text-right py-4 px-4">
-                            Rs. {stock.avgPurchasePrice?.toFixed(2) || stock.purchasePrice?.toFixed(2) || "0.00"}
+                            {stock.quantity?. toLocaleString() || 0}
+                          </td>
+                          <td className="text-right py-4 px-4">
+                            Rs. {avgPrice.toFixed(2)}
                           </td>
                           <td className="text-right py-4 px-4 font-semibold">
-                            Rs. {(stock.totalInvested || 0).toLocaleString("en-NP", { maximumFractionDigits: 2 })}
+                            Rs.  {totalInvested.toLocaleString("en-NP", { maximumFractionDigits: 2 })}
                           </td>
                           <td className="text-center py-4 px-4">
                             <Button
@@ -303,8 +397,8 @@ const Portfolio = () => {
                             </Button>
                           </td>
                         </tr>
-                      ) : null
-                    )}
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
