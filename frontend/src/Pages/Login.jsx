@@ -1,57 +1,111 @@
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth"
 import { auth } from "../firebase"
 import { LoginForm } from "@/Components/login-form"
 
 const Login = () => {
   const navigate = useNavigate()
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
-  useEffect(() => {
-    const form = document.querySelector("form")
+  // Handles email/password login
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    setError("")
+    setLoading(true)
 
-    if (!form) return
-
-    const handleSubmit = async (e) => {
-      e.preventDefault()
-      setError("")
-      setLoading(true)
-
-      const email = form.querySelector("#email")?.value
-      const password = form.querySelector("#password")?.value
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password)
-        navigate("/homepage")
-      } catch (err) {
-        setError(err.message || "Login failed")
-      } finally {
-        setLoading(false)
+    try {
+      await signInWithEmailAndPassword(auth, email, password)
+      navigate("/homepage")
+    } catch (err) {
+      console.error("Login error:", err)
+      if (err.code === 'auth/user-not-found') {
+        setError("No account found with this email.")
+      } else if (err. code === 'auth/wrong-password') {
+        setError("Incorrect password.")
+      } else if (err.code === 'auth/invalid-email') {
+        setError("Invalid email address.")
+      } else {
+        setError(err.message || "Login failed. Please try again.")
       }
+    } finally {
+      setLoading(false)
     }
+  }
 
-    form.addEventListener("submit", handleSubmit)
-    return () => form.removeEventListener("submit", handleSubmit)
-  }, [navigate])
+  // Handles Google Sign-In
+  const handleGoogleSignIn = async () => {
+    setError("")
+    setLoading(true)
+
+    try {
+      const provider = new GoogleAuthProvider()
+      
+      provider.setCustomParameters({
+        prompt: 'select_account'
+      })
+
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
+      console.log("User signed in with Google:", user)
+
+      // Check if user exists in backend, if not create them
+      try {
+        await fetch("http://localhost:5000/api/users", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            firebaseUid: user.uid,
+            name: user.displayName || "Google User",
+            email: user. email
+          }),
+        })
+      } catch (backendErr) {
+        // User might already exist, which is fine for login
+        console.log("Backend sync:", backendErr)
+      }
+
+      navigate("/homepage")
+    } catch (err) {
+      console.error("Google sign-in error:", err)
+      
+      if (err.code === 'auth/popup-closed-by-user') {
+        setError("Sign-in cancelled. Please try again.")
+      } else if (err. code === 'auth/popup-blocked') {
+        setError("Popup was blocked. Please allow popups for this site.")
+      } else if (err.code === 'auth/account-exists-with-different-credential') {
+        setError("An account already exists with the same email address.")
+      } else {
+        setError(err.message || "Failed to sign in with Google. Please try again.")
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
-    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md:p-10">
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center p-6 md: p-10">
       <div className="w-full max-w-sm md:max-w-4xl">
-        {error && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </div>
-        )}
+        <LoginForm
+          email={email}
+          setEmail={setEmail}
+          password={password}
+          setPassword={setPassword}
+          onSubmit={handleLogin}
+          onGoogleSignIn={handleGoogleSignIn}
+          error={error}
+          loading={loading}
+        />
 
-        <LoginForm />
-
-        {loading && (
-          <p className="text-center text-sm text-muted-foreground">
-            Signing in...
-          </p>
-        )}
+        <div className="text-center mt-4 text-sm text-gray-600">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-blue-600 hover:text-blue-700 font-semibold">
+            Sign up here
+          </Link>
+        </div>
       </div>
     </div>
   )
