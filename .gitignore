@@ -31,6 +31,7 @@ backend/node_modules/
 backend/.env
 Backend/combined_csv
 ShareSansarScraper
+Scraper
 # =========================
 # Build & Cache
 # =========================
