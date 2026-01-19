@@ -10,7 +10,7 @@ import portfolioRoute from "./Routes/Portfolio.js"
 import todayprice from "./Routes/TodayPrice.js"
 import Leaderboard from "./Routes/Leaderboard.js"
 
-dotenv.config();
+dotenv.config({ path: "./.env" });
 connectDB();
 
 const app = express();
@@ -39,10 +39,10 @@ app.listen(PORT, () =>
 );
 
 //Only use this when you have to import data manually
-/*importCSVData().then(() => {
+importCSVData().then(() => {
   console.log("CSV data imported successfully");
 }).catch(err => {
   console.error("Error importing CSV data:", err);
 });
 
-*/
+
