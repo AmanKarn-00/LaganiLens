@@ -1,5 +1,8 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
+const MILLION = 1000000;
+const THOUSAND = 1000;
+
 export default function VolumeChart({ data }) {
   if (!data || data.length === 0) {
     return (
@@ -33,8 +36,8 @@ export default function VolumeChart({ data }) {
           stroke="#9ca3af"
           tick={{ fill: '#9ca3af' }}
           tickFormatter={(value) => {
-            if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
-            if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+            if (value >= MILLION) return `${(value / MILLION).toFixed(1)}M`;
+            if (value >= THOUSAND) return `${(value / THOUSAND).toFixed(0)}K`;
             return value;
           }}
         />

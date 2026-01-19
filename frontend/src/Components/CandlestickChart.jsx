@@ -94,12 +94,17 @@ export default function CandlestickChart({ data }) {
     volumeSeries.setData(volumeData);
 
     // Add MA120 line
-    const ma120Data = data
-      .filter(item => item.ma120 !== null && item.ma120 !== undefined)
-      .map(item => ({
-        time: item.time,
-        value: item.ma120,
-      }));
+    const ma120Data = [];
+    const ma180Data = [];
+    
+    data.forEach(item => {
+      if (item.ma120 !== null && item.ma120 !== undefined) {
+        ma120Data.push({ time: item.time, value: item.ma120 });
+      }
+      if (item.ma180 !== null && item.ma180 !== undefined) {
+        ma180Data.push({ time: item.time, value: item.ma180 });
+      }
+    });
 
     if (ma120Data.length > 0) {
       const ma120Series = chart.addLineSeries({
@@ -112,13 +117,6 @@ export default function CandlestickChart({ data }) {
     }
 
     // Add MA180 line
-    const ma180Data = data
-      .filter(item => item.ma180 !== null && item.ma180 !== undefined)
-      .map(item => ({
-        time: item.time,
-        value: item.ma180,
-      }));
-
     if (ma180Data.length > 0) {
       const ma180Series = chart.addLineSeries({
         color: '#f59e0b',

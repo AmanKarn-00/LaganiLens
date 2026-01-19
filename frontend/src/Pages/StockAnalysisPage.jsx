@@ -34,10 +34,11 @@ export default function StockAnalysisPage() {
         throw new Error(`Failed to fetch data: ${response.status}`);
       }
 
-      const data = await response.json();
+      // API response format: { symbol: string, data: array }
+      const result = await response.json();
       
-      if (data.data && data.data.length > 0) {
-        setChartData(data.data);
+      if (result.data && result.data.length > 0) {
+        setChartData(result.data);
       } else {
         setError('No historical data available for this stock');
         setChartData(null);
