@@ -1,3 +1,0 @@
-User-agent: *
-Disallow:
-Sitemap: https://omitnomis.github.io/ShareSansarScraper/sitemap.xml
