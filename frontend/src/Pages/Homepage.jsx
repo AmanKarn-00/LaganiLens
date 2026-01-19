@@ -216,7 +216,7 @@ const Homepage = () => {
                   <BarChart3 className="h-5 w-5 text-blue-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">Market Data</CardTitle>
+                  <CardTitle className="text-lg">Stock Analysis</CardTitle>
                   <CardDescription>
                     Historical analytics
                   </CardDescription>
@@ -225,13 +225,14 @@ const Homepage = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-4">
-                Access historical NEPSE data and perform comprehensive market analysis.
+                Analyze historical price trends, volume data, and moving averages for NEPSE stocks.
               </p>
               <Button 
+                onClick={() => navigate("/analysis")}
                 variant="secondary"
                 className="w-full"
               >
-                View Data
+                View Analysis
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </CardContent>
