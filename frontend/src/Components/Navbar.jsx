@@ -8,7 +8,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { LogOut, LayoutDashboard, Home, Info, CandlestickChart } from 'lucide-react'
+import { LogOut, LayoutDashboard, Home, Info, CandlestickChart, BarChart3 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,

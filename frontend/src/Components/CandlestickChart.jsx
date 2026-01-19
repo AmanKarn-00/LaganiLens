@@ -7,7 +7,16 @@ export default function CandlestickChart({ data }) {
   const seriesRef = useRef({});
 
   useEffect(() => {
-    if (!chartContainerRef.current || !data || data.length === 0) return;
+    // Ensure container and data are valid
+    if (!chartContainerRef.current) {
+      console.error('Chart container is not available');
+      return;
+    }
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.error('Invalid or missing data for chart:', data);
+      return;
+    }
 
     // Create chart
     const chart = createChart(chartContainerRef.current, {
@@ -44,6 +53,12 @@ export default function CandlestickChart({ data }) {
     });
 
     chartRef.current = chart;
+
+    // Debug: Check if the `addCandlestickSeries` method exists
+    if (typeof chart.addCandlestickSeries !== 'function') {
+      console.error('addCandlestickSeries method is not available on the chart object:', chart);
+      return;
+    }
 
     // Add candlestick series
     const candlestickSeries = chart.addCandlestickSeries({
