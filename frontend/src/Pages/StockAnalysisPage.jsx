@@ -47,7 +47,7 @@ export default function StockAnalysisPage() {
 
       try {
         const res = await fetch(
-          `http://localhost:5000/api/stocks/history/${stock}?days=${days}`
+          `/api/stocks/history/${stock}?days=${days}`
         );
         if (!res.ok) throw new Error(`Failed to fetch history: ${res.status}`);
         const data = await res.json();
@@ -83,7 +83,7 @@ export default function StockAnalysisPage() {
   const getStats = () => {
     if (!chartData.length) return null;
     
-    const prices = chartData.map(d => d.close).filter(Boolean);
+    const prices = chartData.map(d => d.close).filter(price => price !== null && price !== undefined);
     const firstPrice = prices[0];
     const lastPrice = prices[prices.length - 1];
     const change = lastPrice - firstPrice;
