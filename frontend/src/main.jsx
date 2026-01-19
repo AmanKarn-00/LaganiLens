@@ -36,8 +36,8 @@ const routing102 = createBrowserRouter([
       { path: "predictstock", element:<ProtectedRoute><StockPredictionPage /></ProtectedRoute>},
       { path: "portfolio", element:<ProtectedRoute><Portfolio/></ProtectedRoute>},
       { path: "leaderboard", element:<ProtectedRoute><Leaderboard/></ProtectedRoute>},
-      { path: "/forgot-password", element:<ProtectedRoute><ForgotPassword/></ProtectedRoute>},
-      { path: "analysis", element:<ProtectedRoute><StockAnalysisPage/></ProtectedRoute>}
+      { path: "analysis", element:<ProtectedRoute><StockAnalysisPage/></ProtectedRoute>},
+      { path: "/forgot-password", element:<ProtectedRoute><ForgotPassword/></ProtectedRoute>}
     
     ]
     

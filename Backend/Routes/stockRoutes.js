@@ -1,7 +1,8 @@
 import express from "express";
 import {
   searchStock,
-  compareStock
+  compareStock,
+  getStockHistory
 } from "../Controllers/compareStock";
 import NepseStock from "../Models/NEPSEdata.js";
 
@@ -9,6 +10,7 @@ const router = express.Router();
 
 router.get("/search", searchStock);
 router.get("/compare", compareStock);
+router.get("/history/:symbol", getStockHistory);
 
 // GET historical OHLC data for charting
 // Example: GET /api/stocks/history/NABIL?days=90

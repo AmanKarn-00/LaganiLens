@@ -8,7 +8,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { LogOut, LayoutDashboard, Home, Info, BarChart3 } from 'lucide-react'
+import { LogOut, LayoutDashboard, Home, Info, CandlestickChart } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -148,7 +148,7 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/analysis')} className="cursor-pointer">
-                      <BarChart3 className="mr-2 h-4 w-4" />
+                      <CandlestickChart className="mr-2 h-4 w-4" />
                       Stock Analysis
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
