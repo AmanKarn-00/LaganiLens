@@ -15,6 +15,7 @@ import StockPredictionPage from './Pages/PredictionPage'
 import Portfolio from './Pages/Portfolio'
 import Leaderboard from './Pages/Leaderboard'
 import ForgotPassword from './Pages/ForgotPassword'
+import StockAnalysisPage from './Pages/StockAnalysisPage'
 const routing102 = createBrowserRouter([
   {
     path: '/'
@@ -35,7 +36,8 @@ const routing102 = createBrowserRouter([
       { path: "predictstock", element:<ProtectedRoute><StockPredictionPage /></ProtectedRoute>},
       { path: "portfolio", element:<ProtectedRoute><Portfolio/></ProtectedRoute>},
       { path: "leaderboard", element:<ProtectedRoute><Leaderboard/></ProtectedRoute>},
-      { path: "/forgot-password", element:<ProtectedRoute><ForgotPassword/></ProtectedRoute>}
+      { path: "/forgot-password", element:<ProtectedRoute><ForgotPassword/></ProtectedRoute>},
+      { path: "analysis", element:<ProtectedRoute><StockAnalysisPage/></ProtectedRoute>}
     
     ]
     
