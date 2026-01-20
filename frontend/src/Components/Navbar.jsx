@@ -8,7 +8,18 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
 } from "@/components/ui/navigation-menu"
-import { LogOut, LayoutDashboard, Home, Info, CandlestickChart, BarChart3 } from 'lucide-react';
+import { 
+  LogOut, 
+  LayoutDashboard, 
+  Home, 
+  Info, 
+  CandlestickChart, 
+  BarChart3, 
+  Brain, 
+  GitCompare,
+  Briefcase,
+  Trophy
+} from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -19,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import logo from '../Assets/logo.jpg'
+
 const Navbar = () => {
   const navigate = useNavigate()
   const user = auth.currentUser
@@ -36,6 +48,11 @@ const Navbar = () => {
     if (!user?.email) return 'U'
     return user.email.charAt(0).toUpperCase()
   }
+
+  const navLinkClass = (isActive) => 
+    `group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled: opacity-50 ${
+      isActive ?  'bg-accent text-accent-foreground' : ''
+    }`
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -55,11 +72,7 @@ const Navbar = () => {
                 <NavigationMenuItem>
                   <NavLink to="/">
                     {({ isActive }) => (
-                      <NavigationMenuLink
-                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                          isActive ? 'bg-accent text-accent-foreground' : ''
-                        }`}
-                      >
+                      <NavigationMenuLink className={navLinkClass(isActive)}>
                         <Home className="mr-2 h-4 w-4" />
                         Home
                       </NavigationMenuLink>
@@ -70,11 +83,7 @@ const Navbar = () => {
                 <NavigationMenuItem>
                   <NavLink to="/about">
                     {({ isActive }) => (
-                      <NavigationMenuLink
-                        className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                          isActive ? 'bg-accent text-accent-foreground' : ''
-                        }`}
-                      >
+                      <NavigationMenuLink className={navLinkClass(isActive)}>
                         <Info className="mr-2 h-4 w-4" />
                         About
                       </NavigationMenuLink>
@@ -83,37 +92,40 @@ const Navbar = () => {
                 </NavigationMenuItem>
 
                 {user && (
-                  <NavigationMenuItem>
-                    <NavLink to="/homepage">
-                      {({ isActive }) => (
-                        <NavigationMenuLink
-                          className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                            isActive ? 'bg-accent text-accent-foreground' : ''
-                          }`}
-                        >
-                          <LayoutDashboard className="mr-2 h-4 w-4" />
-                          Dashboard
-                        </NavigationMenuLink>
-                      )}
-                    </NavLink>
-                  </NavigationMenuItem>
-                )}
+                  <>
+                    <NavigationMenuItem>
+                      <NavLink to="/homepage">
+                        {({ isActive }) => (
+                          <NavigationMenuLink className={navLinkClass(isActive)}>
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            Dashboard
+                          </NavigationMenuLink>
+                        )}
+                      </NavLink>
+                    </NavigationMenuItem>
 
-                {user && (
-                  <NavigationMenuItem>
-                    <NavLink to="/analysis">
-                      {({ isActive }) => (
-                        <NavigationMenuLink
-                          className={`group inline-flex h-9 w-max items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 ${
-                            isActive ? 'bg-accent text-accent-foreground' : ''
-                          }`}
-                        >
-                          <BarChart3 className="mr-2 h-4 w-4" />
-                          Analysis
-                        </NavigationMenuLink>
-                      )}
-                    </NavLink>
-                  </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <NavLink to="/analysis">
+                        {({ isActive }) => (
+                          <NavigationMenuLink className={navLinkClass(isActive)}>
+                            <CandlestickChart className="mr-2 h-4 w-4" />
+                            Charts
+                          </NavigationMenuLink>
+                        )}
+                      </NavLink>
+                    </NavigationMenuItem>
+
+                    <NavigationMenuItem>
+                      <NavLink to="/predictstock">
+                        {({ isActive }) => (
+                          <NavigationMenuLink className={navLinkClass(isActive)}>
+                            <Brain className="mr-2 h-4 w-4" />
+                            Predict
+                          </NavigationMenuLink>
+                        )}
+                      </NavLink>
+                    </NavigationMenuItem>
+                  </>
                 )}
               </NavigationMenuList>
             </NavigationMenu>
@@ -142,21 +154,41 @@ const Navbar = () => {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem onClick={() => navigate('/homepage')} className="cursor-pointer">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       Dashboard
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem onClick={() => navigate('/analysis')} className="cursor-pointer">
                       <CandlestickChart className="mr-2 h-4 w-4" />
                       Stock Analysis
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate('/portfolio')} className="cursor-pointer">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      Your Portfolio
+                    
+                    <DropdownMenuItem onClick={() => navigate('/predictstock')} className="cursor-pointer">
+                      <Brain className="mr-2 h-4 w-4" />
+                      AI Predictions
                     </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/comparestocks')} className="cursor-pointer">
+                      <GitCompare className="mr-2 h-4 w-4" />
+                      Compare Stocks
+                    </DropdownMenuItem>
+                    
                     <DropdownMenuSeparator />
+                    
+                    <DropdownMenuItem onClick={() => navigate('/portfolio')} className="cursor-pointer">
+                      <Briefcase className="mr-2 h-4 w-4" />
+                      My Portfolio
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuItem onClick={() => navigate('/leaderboard')} className="cursor-pointer">
+                      <Trophy className="mr-2 h-4 w-4" />
+                      Leaderboard
+                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
