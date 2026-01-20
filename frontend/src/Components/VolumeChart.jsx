@@ -37,8 +37,8 @@ export default function VolumeChart({ data }) {
   }
 
   const chartData = data.map(item => ({
-    date: item.date,
-    volume: item.volume,
+    date: item. date,
+    volume: item. volume,
     isUp: item.close >= item.open,
   }));
 
@@ -49,7 +49,7 @@ export default function VolumeChart({ data }) {
         
         <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 p-4 rounded-xl border border-white/10">
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom:  0 }}>
+            <BarChart data={chartData} margin={{ top: 10, right: 30, left:  0, bottom: 0 }}>
               <defs>
                 <linearGradient id="volumeGreen" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="#10b981" stopOpacity={0.8} />
@@ -67,7 +67,7 @@ export default function VolumeChart({ data }) {
                 dataKey="date" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#94a3b8', fontSize: 11 }}
+                tick={{ fill:  '#94a3b8', fontSize: 11 }}
                 tickFormatter={(value) => {
                   const date = new Date(value);
                   return `${date.getMonth() + 1}/${date.getDate()}`;
@@ -77,7 +77,7 @@ export default function VolumeChart({ data }) {
               <YAxis 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill:  '#94a3b8', fontSize: 11 }}
+                tick={{ fill: '#94a3b8', fontSize: 11 }}
                 tickFormatter={(value) => {
                   if (value >= MILLION) return `${(value / MILLION).toFixed(1)}M`;
                   if (value >= THOUSAND) return `${(value / THOUSAND).toFixed(0)}K`;
