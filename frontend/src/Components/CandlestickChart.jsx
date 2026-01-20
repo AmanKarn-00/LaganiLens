@@ -7,7 +7,6 @@ export default function CandlestickChart({ data }) {
   const seriesRef = useRef({});
 
   useEffect(() => {
-    // Ensure container and data are valid
     if (!chartContainerRef. current) {
       console.error('Chart container is not available');
       return;
@@ -18,68 +17,90 @@ export default function CandlestickChart({ data }) {
       return;
     }
 
-    // Create chart
+    // ✨ Modern Clean Theme
     const chart = createChart(chartContainerRef.current, {
       layout: {
-        background: { color: '#0a0a0a' },
-        textColor: '#d1d5db',
+        background: { 
+          type: 'gradient',
+          topColor: '#1a1a2e',
+          bottomColor: '#16213e',
+        },
+        textColor: '#a0aec0',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
       },
-      grid:  {
-        vertLines: { color: '#1f2937' },
-        horzLines: { color: '#1f2937' },
+      grid: {
+        vertLines: { 
+          color: 'rgba(99, 102, 241, 0.1)',
+          style: 1,
+        },
+        horzLines: { 
+          color:  'rgba(99, 102, 241, 0.1)',
+          style: 1,
+        },
       },
       width: chartContainerRef.current.clientWidth,
       height: 500,
-      timeScale: {
+      timeScale:  {
         timeVisible: true,
-        borderColor: '#374151',
+        borderColor: 'rgba(99, 102, 241, 0.3)',
+        rightOffset: 5,
+        barSpacing: 12,
+        fixLeftEdge: true,
+        lockVisibleTimeRangeOnResize: true,
       },
       rightPriceScale: {
-        borderColor: '#374151',
+        borderColor: 'rgba(99, 102, 241, 0.3)',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.2,
+        },
       },
       crosshair: {
         mode: 1,
         vertLine: {
-          color: '#6b7280',
-          width:  1,
-          style: 2,
-        },
-        horzLine: {
-          color:  '#6b7280',
+          color: 'rgba(167, 139, 250, 0.5)',
           width: 1,
           style: 2,
+          labelBackgroundColor: '#7c3aed',
         },
+        horzLine: {
+          color: 'rgba(167, 139, 250, 0.5)',
+          width: 1,
+          style:  2,
+          labelBackgroundColor: '#7c3aed',
+        },
+      },
+      handleScroll: {
+        vertTouchDrag: true,
       },
     });
 
     chartRef.current = chart;
 
-    // ===== LIGHTWEIGHT-CHARTS V5 API =====
-    // Use chart.addSeries(SeriesType, options)
+    // ✨ Beautiful Candlesticks - Gradient-like colors
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#10b981',
       downColor:  '#ef4444',
-      borderUpColor: '#10b981',
-      borderDownColor: '#ef4444',
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
+      borderVisible: true,
+      borderUpColor: '#34d399',
+      borderDownColor: '#f87171',
+      wickUpColor:  '#34d399',
+      wickDownColor: '#f87171',
     });
 
     seriesRef.current.candlestick = candlestickSeries;
 
-    // Format data for candlestick
-    const candlestickData = data.map(item => ({
-      time: item. time,
-      open: item. open,
-      high: item. high,
-      low: item. low,
-      close: item. close,
+    const candlestickData = data. map(item => ({
+      time: item.time,
+      open: item.open,
+      high: item.high,
+      low: item.low,
+      close: item.close,
     }));
     candlestickSeries.setData(candlestickData);
 
-    // Add volume series
-    const volumeSeries = chart. addSeries(HistogramSeries, {
-      color: '#26a69a',
+    // ✨ Stylish Volume Bars
+    const volumeSeries = chart.addSeries(HistogramSeries, {
       priceFormat: { type: 'volume' },
       priceScaleId: 'volume',
     });
@@ -88,20 +109,21 @@ export default function CandlestickChart({ data }) {
 
     volumeSeries.priceScale().applyOptions({
       scaleMargins: {
-        top: 0.8,
+        top: 0.85,
         bottom: 0,
       },
     });
 
-    // Format data for volume with color coding
     const volumeData = data.map(item => ({
-      time: item.time,
+      time:  item.time,
       value: item.volume,
-      color: item.close >= item.open ? '#10b98180' : '#ef444480',
+      color: item.close >= item.open 
+        ? 'rgba(16, 185, 129, 0.4)'  // Green with transparency
+        : 'rgba(239, 68, 68, 0.4)',  // Red with transparency
     }));
     volumeSeries.setData(volumeData);
 
-    // Add MA120 line
+    // ✨ Glowing MA Lines
     const ma120Data = [];
     const ma180Data = [];
 
@@ -109,47 +131,49 @@ export default function CandlestickChart({ data }) {
       if (item.ma120 !== null && item.ma120 !== undefined) {
         ma120Data.push({ time: item.time, value: item.ma120 });
       }
-      if (item.ma180 !== null && item.ma180 !== undefined) {
+      if (item. ma180 !== null && item. ma180 !== undefined) {
         ma180Data.push({ time: item.time, value: item.ma180 });
       }
     });
 
     if (ma120Data.length > 0) {
       const ma120Series = chart.addSeries(LineSeries, {
-        color: '#3b82f6',
+        color: '#06b6d4',  // Cyan
         lineWidth: 2,
-        title: 'MA 120',
+        lineStyle: 0,
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBackgroundColor: '#06b6d4',
       });
       seriesRef.current.ma120 = ma120Series;
       ma120Series.setData(ma120Data);
     }
 
-    // Add MA180 line
     if (ma180Data.length > 0) {
-      const ma180Series = chart.addSeries(LineSeries, {
-        color: '#f59e0b',
+      const ma180Series = chart. addSeries(LineSeries, {
+        color: '#f59e0b',  // Amber
         lineWidth: 2,
-        title: 'MA 180',
+        lineStyle: 0,
+        crosshairMarkerVisible: true,
+        crosshairMarkerRadius: 4,
+        crosshairMarkerBackgroundColor: '#f59e0b',
       });
       seriesRef.current.ma180 = ma180Series;
       ma180Series.setData(ma180Data);
     }
 
-    // Fit content
     chart.timeScale().fitContent();
 
-    // Handle resize
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
         chartRef.current.applyOptions({
-          width: chartContainerRef.current.clientWidth,
+          width: chartContainerRef.current. clientWidth,
         });
       }
     };
 
-    window.addEventListener('resize', handleResize);
+    window. addEventListener('resize', handleResize);
 
-    // Cleanup
     return () => {
       window.removeEventListener('resize', handleResize);
       if (chartRef.current) {
@@ -161,15 +185,35 @@ export default function CandlestickChart({ data }) {
 
   return (
     <div className="space-y-4">
-      <div ref={chartContainerRef} className="w-full" />
-      <div className="flex items-center justify-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-blue-500"></div>
-          <span className="text-gray-400">MA 120</span>
+      {/* Chart Container with Glass Effect */}
+      <div className="relative rounded-xl overflow-hidden shadow-2xl">
+        {/* Glow Effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-xl" />
+        
+        {/* Chart */}
+        <div 
+          ref={chartContainerRef} 
+          className="relative w-full rounded-xl border border-white/10"
+        />
+      </div>
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20">
+          <div className="w-3 h-3 rounded-full bg-cyan-500 shadow-lg shadow-cyan-500/50"></div>
+          <span className="text-cyan-400 font-medium">MA 120</span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-0.5 bg-amber-500"></div>
-          <span className="text-gray-400">MA 180</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+          <div className="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/50"></div>
+          <span className="text-amber-400 font-medium">MA 180</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+          <div className="w-2 h-4 rounded-sm bg-emerald-500"></div>
+          <span className="text-emerald-400 font-medium">Bullish</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 border border-red-500/20">
+          <div className="w-2 h-4 rounded-sm bg-red-500"></div>
+          <span className="text-red-400 font-medium">Bearish</span>
         </div>
       </div>
     </div>
