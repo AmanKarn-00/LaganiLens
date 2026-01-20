@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { createChart } from 'lightweight-charts';
+import { createChart, CandlestickSeries, LineSeries, HistogramSeries } from 'lightweight-charts';
 
 export default function CandlestickChart({ data }) {
   const chartContainerRef = useRef(null);
@@ -8,7 +8,7 @@ export default function CandlestickChart({ data }) {
 
   useEffect(() => {
     // Ensure container and data are valid
-    if (!chartContainerRef.current) {
+    if (!chartContainerRef. current) {
       console.error('Chart container is not available');
       return;
     }
@@ -24,7 +24,7 @@ export default function CandlestickChart({ data }) {
         background: { color: '#0a0a0a' },
         textColor: '#d1d5db',
       },
-      grid: {
+      grid:  {
         vertLines: { color: '#1f2937' },
         horzLines: { color: '#1f2937' },
       },
@@ -41,11 +41,11 @@ export default function CandlestickChart({ data }) {
         mode: 1,
         vertLine: {
           color: '#6b7280',
-          width: 1,
+          width:  1,
           style: 2,
         },
         horzLine: {
-          color: '#6b7280',
+          color:  '#6b7280',
           width: 1,
           style: 2,
         },
@@ -54,16 +54,11 @@ export default function CandlestickChart({ data }) {
 
     chartRef.current = chart;
 
-    // Debug: Check if the `addCandlestickSeries` method exists
-    if (typeof chart.addCandlestickSeries !== 'function') {
-      console.error('addCandlestickSeries method is not available on the chart object:', chart);
-      return;
-    }
-
-    // Add candlestick series
-    const candlestickSeries = chart.addCandlestickSeries({
+    // ===== LIGHTWEIGHT-CHARTS V5 API =====
+    // Use chart.addSeries(SeriesType, options)
+    const candlestickSeries = chart.addSeries(CandlestickSeries, {
       upColor: '#10b981',
-      downColor: '#ef4444',
+      downColor:  '#ef4444',
       borderUpColor: '#10b981',
       borderDownColor: '#ef4444',
       wickUpColor: '#10b981',
@@ -74,25 +69,23 @@ export default function CandlestickChart({ data }) {
 
     // Format data for candlestick
     const candlestickData = data.map(item => ({
-      time: item.time,
-      open: item.open,
-      high: item.high,
-      low: item.low,
-      close: item.close,
+      time: item. time,
+      open: item. open,
+      high: item. high,
+      low: item. low,
+      close: item. close,
     }));
     candlestickSeries.setData(candlestickData);
 
     // Add volume series
-    const volumeSeries = chart.addHistogramSeries({
+    const volumeSeries = chart. addSeries(HistogramSeries, {
       color: '#26a69a',
-      priceFormat: {
-        type: 'volume',
-      },
-      priceScaleId: '',
+      priceFormat: { type: 'volume' },
+      priceScaleId: 'volume',
     });
 
     seriesRef.current.volume = volumeSeries;
-    
+
     volumeSeries.priceScale().applyOptions({
       scaleMargins: {
         top: 0.8,
@@ -111,7 +104,7 @@ export default function CandlestickChart({ data }) {
     // Add MA120 line
     const ma120Data = [];
     const ma180Data = [];
-    
+
     data.forEach(item => {
       if (item.ma120 !== null && item.ma120 !== undefined) {
         ma120Data.push({ time: item.time, value: item.ma120 });
@@ -122,7 +115,7 @@ export default function CandlestickChart({ data }) {
     });
 
     if (ma120Data.length > 0) {
-      const ma120Series = chart.addLineSeries({
+      const ma120Series = chart.addSeries(LineSeries, {
         color: '#3b82f6',
         lineWidth: 2,
         title: 'MA 120',
@@ -133,7 +126,7 @@ export default function CandlestickChart({ data }) {
 
     // Add MA180 line
     if (ma180Data.length > 0) {
-      const ma180Series = chart.addLineSeries({
+      const ma180Series = chart.addSeries(LineSeries, {
         color: '#f59e0b',
         lineWidth: 2,
         title: 'MA 180',
