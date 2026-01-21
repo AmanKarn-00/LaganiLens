@@ -1,135 +1,83 @@
 import { TrendingUp, TrendingDown } from "lucide-react";
-import { Card } from "@/components/ui/card";
+
+const metrics = [
+  { key: "price", label: "Current Price", format: v => `Rs. ${v?.toFixed(2) || 'N/A'}` },
+  { key: "changePercent", label: "Change %", format: v => `${v || 0}%` },
+  { key: "high52w", label: "52W High", format: v => `Rs. ${v?.toFixed(2) || 'N/A'}` },
+  { key: "low52w", label: "52W Low", format: v => `Rs. ${v?.toFixed(2) || 'N/A'}` },
+  { key: "volume", label: "Volume", format: v => `${v ? (v / 1000).toFixed(1) : 'N/A'}K` },
+];
 
 export default function CompareTable({ stocks }) {
-  if (!stocks || stocks.length < 2) return null;
-
   const [a, b] = stocks;
 
-  /* ---------- Helpers ---------- */
-
-  const safeFormat = (value, formatter) => {
-    if (value === null || value === undefined || isNaN(value)) return "-";
-    return formatter(value);
+  const isBetter = (x, y) => {
+    if (x === undefined || y === undefined || x === null || y === null) return null;
+    return x > y ? "better" : x < y ? "worse" : "equal";
   };
 
-  const isBetter = (x, y, lowerBetter) => {
-    if (x == null || y == null) return false;
-    return lowerBetter ? x < y : x > y;
+  const getValueColor = (result) => {
+    if (result === "better") return "text-emerald-400 font-semibold";
+    if (result === "worse") return "text-red-400 font-semibold";
+    return "text-slate-300";
   };
-
-  /* ---------- Metrics ---------- */
-
-  const metrics = [
-    {
-      key: "price",
-      label: "Current Price",
-      format: v => `Rs. ${v.toFixed(2)}`,
-      lowerBetter: false,
-    },
-    {
-      key: "changePercent",
-      label: "Change %",
-      format: v => `${v > 0 ? "+" : ""}${v.toFixed(2)}%`,
-      lowerBetter: false,
-    },
-    {
-      key: "high52w",
-      label: "52W High",
-      format: v => `Rs. ${v.toFixed(2)}`,
-      lowerBetter: false,
-    },
-    {
-      key: "low52w",
-      label: "52W Low",
-      format: v => `Rs. ${v.toFixed(2)}`,
-      lowerBetter: false,
-    },
-    {
-      key: "marketCap",
-      label: "Market Cap",
-      format: v => `${v}M`,
-      lowerBetter: false,
-    },
-    {
-      key: "peRatio",
-      label: "P/E Ratio",
-      format: v => v.toFixed(1),
-      lowerBetter: true,
-    },
-    {
-      key: "volume",
-      label: "Volume",
-      format: v => v.toLocaleString(),
-      lowerBetter: false,
-    },
-  ];
-
-  /* ---------- UI ---------- */
 
   return (
-    <div className="relative group">
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-cyan-600/10 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-lg border border-border bg-slate-950/50">
+        <table className="w-full text-sm">
+          {/* Header */}
+          <thead>
+            <tr className="border-b border-border bg-slate-900/50">
+              <th className="text-left px-4 py-3 text-slate-400 font-semibold">Metric</th>
+              <th className="px-4 py-3 text-slate-400 font-semibold text-center">{a.symbol}</th>
+              <th className="px-4 py-3 text-slate-400 font-semibold text-center">{b.symbol}</th>
+            </tr>
+          </thead>
 
-      <div className="relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all duration-300">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10 bg-gradient-to-r from-purple-500/5 to-cyan-500/5">
-                <th className="text-left p-6 font-semibold text-slate-300">
-                  Metric
-                </th>
-                <th className="p-6 font-semibold text-white text-center">
-                  {a.symbol}
-                </th>
-                <th className="p-6 font-semibold text-white text-center">
-                  {b.symbol}
-                </th>
-              </tr>
-            </thead>
+          {/* Body */}
+          <tbody>
+            {metrics.map((m, idx) => {
+              const resultA = isBetter(a[m.key], b[m.key]);
+              const resultB = isBetter(b[m.key], a[m.key]);
 
-            <tbody className="divide-y divide-white/5">
-              {metrics.map(m => {
-                const aVal = a[m.key];
-                const bVal = b[m.key];
+              return (
+                <tr 
+                  key={m.key} 
+                  className="border-b border-border/50 hover:bg-slate-900/30 transition-colors"
+                >
+                  <td className="px-4 py-3 font-medium text-slate-200">
+                    {m.label}
+                  </td>
 
-                const aWins = isBetter(aVal, bVal, m.lowerBetter);
-                const bWins = isBetter(bVal, aVal, m.lowerBetter);
+                  <td className={`px-4 py-3 text-center ${getValueColor(resultA)}`}>
+                    <div className="flex items-center justify-center gap-2">
+                      {m.format(a[m.key])}
+                      {resultA === "better" && (
+                        <TrendingUp className="h-4 w-4 text-emerald-400" />
+                      )}
+                      {resultA === "worse" && (
+                        <TrendingDown className="h-4 w-4 text-red-400" />
+                      )}
+                    </div>
+                  </td>
 
-                return (
-                  <tr
-                    key={m.key}
-                    className="hover:bg-white/5 transition-colors duration-200"
-                  >
-                    <td className="p-6 font-medium text-slate-300">
-                      {m.label}
-                    </td>
-
-                    <td
-                      className={`p-6 font-semibold text-center transition-colors duration-200 ${
-                        aWins
-                          ? "text-emerald-400 bg-emerald-500/5"
-                          : "text-slate-300"
-                      }`}
-                    >
-                      {safeFormat(aVal, m.format)}
-                    </td>
-
-                    <td
-                      className={`p-6 font-semibold text-center transition-colors duration-200 ${
-                        bWins
-                          ? "text-emerald-400 bg-emerald-500/5"
-                          : "text-slate-300"
-                      }`}
-                    >
-                      {safeFormat(bVal, m.format)}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                  <td className={`px-4 py-3 text-center ${getValueColor(resultB)}`}>
+                    <div className="flex items-center justify-center gap-2">
+                      {m.format(b[m.key])}
+                      {resultB === "better" && (
+                        <TrendingUp className="h-4 w-4 text-emerald-400" />
+                      )}
+                      {resultB === "worse" && (
+                        <TrendingDown className="h-4 w-4 text-red-400" />
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );
