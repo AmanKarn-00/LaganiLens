@@ -34,7 +34,7 @@ export default function StockPredictionPage() {
       setError(null);
 
       try {
-        const res = await fetch(`/api/predictions? symbol=${stock}`);
+        const res = await fetch(`/api/predictions?symbol=${stock}`);
         if (!res.ok) throw new Error(`Failed to fetch prediction: ${res. status}`);
         const data = await res.json();
         setPrediction(data);
