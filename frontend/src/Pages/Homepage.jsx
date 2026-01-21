@@ -209,7 +209,7 @@ const Homepage = () => {
           </Card>
 
           {/* Leaderboard */}
-          <Card className="group hover: shadow-lg transition-all duration-200 border-amber-500/20 hover:border-amber-500/40">
+          <Card className="group hover:shadow-lg transition-all duration-200 border-amber-500/20 hover:border-amber-500/40">
             <CardHeader>
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-amber-500/10">

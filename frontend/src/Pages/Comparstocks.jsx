@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import StockSelect from "../components/StockSelect"
 import CompareTable from "../components/CompareTable"
+import CompareChart from "../components/CompareChart"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,7 +38,7 @@ export default function CompareStocksPage() {
 
         if (!res.ok) {
           const contentType = res.headers.get("content-type")
-          if (contentType?. includes("application/json")) {
+          if (contentType?.includes("application/json")) {
             const errorData = await res.json()
             throw new Error(errorData.message || "Failed to fetch stock data")
           } else {
@@ -47,7 +48,7 @@ export default function CompareStocksPage() {
 
         const json = await res.json()
 
-        if (! json.stocks || ! Array.isArray(json.stocks) || json.stocks.length !== 2) {
+        if (!json.stocks || !Array.isArray(json.stocks) || json.stocks.length !== 2) {
           throw new Error("Invalid response format from server")
         }
 
@@ -69,6 +70,20 @@ export default function CompareStocksPage() {
       controller.abort()
     }
   }, [stockA, stockB])
+
+  // Prepare chart data from stocks
+  const getChartData = () => {
+    if (data.length !== 2) return []
+
+    const [a, b] = data
+    return [
+      { metric: "Current Price", stockA: a.price || 0, stockB: b.price || 0 },
+      { metric: "52W High", stockA: a.high52w || 0, stockB: b.high52w || 0 },
+      { metric: "52W Low", stockA: a.low52w || 0, stockB: b.low52w || 0 },
+      { metric: "Volume", stockA: a.volume || 0, stockB: b.volume || 0 },
+      { metric: "Market Cap", stockA: a.marketCap || 0, stockB: b.marketCap || 0 },
+    ]
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -134,7 +149,7 @@ export default function CompareStocksPage() {
             <CardContent className="py-12">
               <div className="text-center text-muted-foreground">
                 <GitCompare className="h-8 w-8 mx-auto mb-4 animate-pulse" />
-                <p>Loading comparison... </p>
+                <p>Loading comparison...</p>
               </div>
             </CardContent>
           </Card>
@@ -177,18 +192,38 @@ export default function CompareStocksPage() {
         )}
 
         {/* Comparison Results */}
-        {! loading && data.length === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Comparison Results</CardTitle>
-              <CardDescription>
-                Showing key metrics for {stockA} vs {stockB}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CompareTable stocks={data} />
-            </CardContent>
-          </Card>
+        {!loading && data.length === 2 && (
+          <div className="space-y-6">
+            {/* Comparison Chart */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Visual Comparison</CardTitle>
+                <CardDescription>
+                  Key metrics comparison between {stockA} and {stockB}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CompareChart 
+                  data={getChartData()} 
+                  stockA={stockA} 
+                  stockB={stockB} 
+                />
+              </CardContent>
+            </Card>
+
+            {/* Comparison Table */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Detailed Metrics</CardTitle>
+                <CardDescription>
+                  Detailed comparison of {stockA} vs {stockB}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CompareTable stocks={data} />
+              </CardContent>
+            </Card>
+          </div>
         )}
 
         {/* Empty State */}
