@@ -2,7 +2,13 @@ from pymongo import MongoClient
 import pandas as pd
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
-from datetime import datetime
+from datetime import datetime, timezone
+import warnings
+
+# Ignore ARIMA convergence warnings if you want
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # MongoDB connection
 client = MongoClient("mongodb://localhost:27017")
@@ -11,7 +17,7 @@ collection = db["nepsestocks"]
 pred_collection = db["predictedStocks"]
 
 # Clear existing predictions
-pred_collection.delete_many({})  # <-- removes all documents
+pred_collection.delete_many({})  # removes all documents
 
 # Get all unique stock symbols
 symbols = collection.distinct("symbol")
@@ -49,7 +55,7 @@ for symbol in symbols:
     # Fit ARIMA model
     try:
         model = ARIMA(series, order=(5,1,0))
-        model_fit = model.fit()
+        model_fit = model.fit(maxiter=500, disp=False)
     except Exception as e:
         print(f"ARIMA failed for {symbol}: {e}")
         continue
@@ -65,7 +71,7 @@ for symbol in symbols:
         "last_price": float(last_price),
         "forecast_days": forecast_days,
         "predicted_prices": [float(p) for p in future_prices],
-        "generated_at": datetime.utcnow()
+        "generated_at": datetime.now(timezone.utc)  # Fixed UTC warning
     }
 
     # Insert new document
