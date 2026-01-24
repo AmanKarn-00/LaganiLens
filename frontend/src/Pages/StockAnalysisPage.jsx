@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import StockSelect from '../Components/StockSelect';
 import CandlestickChart from '../Components/CandlestickChart';
@@ -20,27 +20,25 @@ export default function StockAnalysisPage() {
 
   const timeRanges = [
     { label: '30D', days: 30 },
-    { label: '90D', days:  90 },
+    { label: '90D', days: 90 },
     { label: '180D', days: 180 },
-    { label:  '1Y', days: 365 },
+    { label: '1Y', days: 365 },
     { label: '2Y', days: 730 },
   ];
 
   const fetchStockData = async (symbol, days) => {
-    if (! symbol) return;
+    if (!symbol) return;
 
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch(`/api/stocks/history/${symbol}?days=${days}`);
-      
       if (!response.ok) {
-        throw new Error(`Failed to fetch data: ${response. status}`);
+        throw new Error(`Failed to fetch data: ${response.status}`);
       }
 
       const result = await response.json();
-      
       if (result.data && result.data.length > 0) {
         setChartData(result.data);
       } else {
@@ -72,6 +70,21 @@ export default function StockAnalysisPage() {
       fetchStockData(selectedStock, days);
     }
   };
+
+  // 🔥 SANITIZE DATA FOR ALL CHARTS
+  const cleanData = useMemo(() => {
+    if (!chartData) return null;
+
+    return chartData
+      .map(d => ({
+        ...d,
+        time: Math.floor(new Date(d.date).getTime() / 1000),
+      }))
+      .sort((a, b) => a.time - b.time)
+      .filter((item, index, arr) =>
+        index === 0 || item.time > arr[index - 1].time
+      );
+  }, [chartData]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -110,8 +123,7 @@ export default function StockAnalysisPage() {
               onChange={handleStockChange}
               className="max-w-md"
             />
-            
-            {/* Time Range Selector */}
+
             {selectedStock && (
               <div className="flex gap-2 flex-wrap pt-2">
                 {timeRanges.map((range) => (
@@ -130,20 +142,18 @@ export default function StockAnalysisPage() {
           </CardContent>
         </Card>
 
-        {/* Loading State */}
+        {/* Loading */}
         {loading && (
           <Card>
-            <CardContent className="py-12">
-              <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
-                <p className="text-muted-foreground">Loading chart data...</p>
-              </div>
+            <CardContent className="py-12 text-center">
+              <div className="animate-spin mx-auto h-12 w-12 border-b-2 border-emerald-500 rounded-full"></div>
+              <p className="mt-4 text-muted-foreground">Loading chart data...</p>
             </CardContent>
           </Card>
         )}
 
-        {/* Error State */}
-        {error && ! loading && (
+        {/* Error */}
+        {error && !loading && (
           <Card className="border-destructive/50">
             <CardContent className="py-6">
               <div className="flex items-center gap-3 text-destructive">
@@ -158,73 +168,43 @@ export default function StockAnalysisPage() {
         )}
 
         {/* Charts */}
-        {chartData && ! loading && !error && (
+        {cleanData && !loading && !error && (
           <div className="space-y-6">
-            {/* Candlestick Chart */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-emerald-500/10">
-                    <CandlestickIcon className="h-5 w-5 text-emerald-500" />
-                  </div>
-                  <div>
-                    <CardTitle>{selectedStock} - Candlestick Chart</CardTitle>
-                    <CardDescription>OHLC data with volume and moving averages (MA 120 & MA 180)</CardDescription>
-                  </div>
-                </div>
+                <CardTitle>{selectedStock} - Candlestick Chart</CardTitle>
               </CardHeader>
               <CardContent>
-                <CandlestickChart data={chartData} />
+                <CandlestickChart data={cleanData} />
               </CardContent>
             </Card>
 
-            {/* Price Trend Chart */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-cyan-500/10">
-                    <TrendingUp className="h-5 w-5 text-cyan-500" />
-                  </div>
-                  <div>
-                    <CardTitle>Price Trend</CardTitle>
-                    <CardDescription>Closing price movement over time</CardDescription>
-                  </div>
-                </div>
+                <CardTitle>Price Trend</CardTitle>
               </CardHeader>
               <CardContent>
-                <WormChart data={chartData} />
+                <WormChart data={cleanData} />
               </CardContent>
             </Card>
 
-            {/* Volume Chart */}
             <Card>
               <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-indigo-500/10">
-                    <BarChart3 className="h-5 w-5 text-indigo-500" />
-                  </div>
-                  <div>
-                    <CardTitle>Trading Volume</CardTitle>
-                    <CardDescription>Daily trading volume with bullish/bearish color coding</CardDescription>
-                  </div>
-                </div>
+                <CardTitle>Trading Volume</CardTitle>
               </CardHeader>
               <CardContent>
-                <VolumeChart data={chartData} />
+                <VolumeChart data={cleanData} />
               </CardContent>
             </Card>
           </div>
         )}
 
-        {/* Empty State */}
         {!selectedStock && !loading && !error && (
           <Card>
-            <CardContent className="py-12">
-              <div className="text-center text-muted-foreground">
-                <CandlestickIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium">No Stock Selected</p>
-                <p className="text-sm mt-1">Select a stock symbol above to view its technical analysis</p>
-              </div>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <CandlestickIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium">No Stock Selected</p>
+              <p className="text-sm mt-1">Select a stock symbol above</p>
             </CardContent>
           </Card>
         )}

@@ -29,7 +29,7 @@ export const importCSVData = async (folderPath = "./combined_csv") => {
   for (const file of files) {
     const operations = [];
 
-    const filename = path.basename(file, ". csv");
+    const filename = path.basename(file, ".csv");
     const normalizedDate = filename.replace(/_/g, "-");
 
     const [year, month, day] = normalizedDate.split("-");

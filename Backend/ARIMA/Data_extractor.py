@@ -52,10 +52,12 @@ for symbol in symbols:
     
     series = df["diff"]
 
-    # Fit ARIMA model
     try:
-        model = ARIMA(series, order=(5,1,0))
-        model_fit = model.fit(maxiter=500, disp=False)
+        model = ARIMA(series, order=(5,0,0))  # already differenced
+        try:
+            model_fit = model.fit(method_kwargs={"maxiter": 500})
+        except TypeError:
+            model_fit = model.fit()
     except Exception as e:
         print(f"ARIMA failed for {symbol}: {e}")
         continue
