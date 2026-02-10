@@ -124,6 +124,81 @@ See [Data Setup](#-data-setup) section for detailed instructions.
 
 ---
 
+## 📝 Implementation Details
+
+### Frontend Implementation
+
+- **React 19** is used as the core UI library, bootstrapped with **Vite** for fast development and optimized production builds.
+- **React Router v7** handles client-side routing with the following pages: Landing (`/`), Login (`/login`), Signup (`/signup`), Homepage (`/homepage`), Compare Stocks (`/comparestocks`), Predict Stock (`/predictstock`), Portfolio (`/portfolio`), Leaderboard (`/leaderboard`), and Stock Analysis (`/analysis`).
+- **Tailwind CSS 4** with the `@tailwindcss/vite` plugin provides utility-first styling across all components.
+- **shadcn/ui** (built on Radix UI primitives) is used for accessible, reusable UI components such as buttons, cards, dialogs, and form elements.
+- **Lucide React** provides a consistent icon set throughout the application.
+- **Recharts** renders line and area charts for stock prediction visualizations on the Prediction page.
+- **Lightweight Charts** (by TradingView) powers interactive OHLCV candlestick charts on the Homepage and Analysis pages.
+- **Firebase Authentication** manages user sign-up and login using email/password, with each user identified by a unique Firebase UID.
+- A `ProtectedRoute` wrapper component guards authenticated routes, redirecting unauthenticated users to the login page.
+- State management is handled at the component level using React's built-in `useState` and `useEffect` hooks—no external state management library is used.
+- The **React Compiler** (via Babel plugin) is enabled for automatic performance optimizations such as memoization.
+- API calls to the backend are made using the native `fetch` API, with the backend base URL configured via Vite environment variables.
+- The `StockSelect` component provides a searchable dropdown for stock symbol selection, fetching matching symbols from the backend search endpoint.
+- The `CompareChart` and `CompareTable` components enable side-by-side multi-stock comparisons with tabular and visual data.
+
+### Backend Implementation
+
+- **Node.js** with **Express 5** serves as the REST API server, handling all data and business logic requests.
+- **Mongoose 9** is used as the ODM (Object Data Modeling) library for MongoDB, defining schemas and managing database operations.
+- **CORS** middleware is enabled to allow cross-origin requests from the React frontend running on a different port.
+- **dotenv** loads environment variables (MongoDB connection string, port) from a `.env` file.
+- API routes are modularized into separate files under the `Routes/` directory:
+  - `stockRoutes.js` — search stocks, compare stocks, and fetch historical OHLCV data.
+  - `predictionRoutes.js` — retrieve ARIMA-generated 30-day price forecasts.
+  - `Portfolio.js` — full CRUD operations for user portfolio management (add, view, update, delete holdings).
+  - `TodayPrice.js` — fetch the latest traded price (LTP) for a given stock symbol.
+  - `Leaderboard.js` — rank users by portfolio profit/performance.
+- The `Controllers/compareStock.js` controller uses MongoDB aggregation pipelines for stock search (regex-based symbol matching) and multi-stock comparison queries.
+- `Historicaldata.js` is a bulk data import script that reads all CSV files from the `combined_csv/` directory using **csv-parser**, transforms and validates each row, and performs MongoDB bulk upsert operations to prevent duplicate records.
+- `Dailydata.js` handles incremental daily CSV imports for keeping the database up to date with the latest market data.
+- The server entry point (`server.js`) registers all route handlers and starts listening on the configured port (default 5000).
+- Error handling is implemented at the route level, returning appropriate HTTP status codes and error messages to the client.
+
+### Database Implementation
+
+- **MongoDB** is used as the primary database, accessed via **Mongoose** ODM from the Node.js backend.
+- The database connection is established in `Models/db.js` using the `MONGO_CONN` environment variable, supporting both local MongoDB instances and MongoDB Atlas cloud clusters.
+- Three main collections are used:
+  - **`nepsestocks`** — stores historical NEPSE stock data with fields for symbol, date, OHLC prices, LTP, volume, turnover, transactions, VWAP, previous close, percentage changes, 120-day and 180-day moving averages, and 52-week high/low values.
+  - **`predictedstocks`** — stores ARIMA model output with fields for symbol (unique), last known price, number of forecast days (30), an array of predicted prices, and the generation timestamp.
+  - **`userportfolios`** — stores user investment data with fields for Firebase UID (unique), user name, email (unique), an embedded array of stock holdings (each with symbol, quantity, and purchase price), and a creation timestamp.
+- A **compound unique index** on `{ symbol: 1, date: 1 }` in the `nepsestocks` collection ensures one record per stock per trading day, preventing duplicate entries during data imports.
+- The `predictedstocks` collection uses a **unique index** on `symbol` so each stock has exactly one prediction document that gets overwritten when predictions are regenerated.
+- The `userportfolios` collection uses **unique indexes** on both `firebaseUid` and `email` to ensure one portfolio per user.
+- The portfolio schema uses an **embedded document pattern** — each user's stock holdings are stored as a sub-document array within the portfolio document, enabling atomic updates to individual holdings.
+- Bulk write operations with `upsert: true` are used during CSV data imports to efficiently insert new records or update existing ones without failing on duplicates.
+
+### ARIMA Implementation
+
+- The ARIMA (AutoRegressive Integrated Moving Average) model is implemented in **Python** in the `Backend/ARIMA/Data_extractor.py` script.
+- **Key libraries used:** `statsmodels` for the ARIMA model, `pandas` for data manipulation, `numpy` for numerical operations, and `pymongo` for direct MongoDB access.
+- The model uses **ARIMA(5, 1, 0)** configuration:
+  - **p = 5** — five autoregressive lag terms, meaning the model uses the previous 5 data points to predict the next value.
+  - **d = 1** — first-order differencing to make the time series stationary by removing trends.
+  - **q = 0** — no moving average terms are used.
+- **Data preprocessing steps:**
+  1. Historical closing prices for each stock symbol are fetched from the `nepsestocks` MongoDB collection, sorted by date.
+  2. A **log transformation** (`numpy.log`) is applied to stabilize variance in the price data.
+  3. **First-order differencing** is applied to the log-transformed series to achieve stationarity.
+- **Model fitting and forecasting:**
+  1. The ARIMA model is fitted on the preprocessed (log-differenced) data with a maximum of 500 iterations for convergence.
+  2. A **30-step-ahead forecast** is generated, producing 30 predicted values in log-differenced space.
+  3. The predictions are **reversed** back to actual price space by applying cumulative sum (`cumsum`) to undo differencing, then exponential (`exp`) to undo the log transformation.
+  4. The last known actual price is used as the base for reconstructing the forecasted price series.
+- The script iterates through **all unique stock symbols** in the database, generating individual 30-day forecasts for each.
+- Results are stored in the `predictedstocks` MongoDB collection, with each document containing the stock symbol, last known price, forecast horizon (30 days), the array of predicted prices, and a generation timestamp.
+- The script connects directly to MongoDB (default: `mongodb://localhost:27017`) using `pymongo`, independent of the Node.js backend.
+- This is a **batch process** meant to be run periodically (e.g., daily after market close) to regenerate predictions with the latest available data.
+
+---
+
 ## ⚙️ Installation
 
 ### Prerequisites
